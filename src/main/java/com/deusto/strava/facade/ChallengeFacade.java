@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,8 +91,12 @@ public class ChallengeFacade {
     @GetMapping("/progress")
     public ResponseEntity<?> getChallengeProgress(@RequestHeader("token") String token) {
         try {
-            List<Map<String, Object>> progress = challengeService.getChallengeProgress(token);  // Cambiado de authService a challengeService
-            return new ResponseEntity<>(progress, HttpStatus.OK);
+            Map<Challenge, Double> progress = challengeService.getChallengeProgress(token);  // Cambiado de authService a challengeService
+			Map<ChallengeDTO, Double>progressdtos = new HashMap<>();
+			for (Map.Entry<Challenge, Double> entry : progress.entrySet()) {
+				progressdtos.put(challengeToDTO(entry.getKey()), entry.getValue());
+			}
+            return new ResponseEntity<>(progressdtos, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
