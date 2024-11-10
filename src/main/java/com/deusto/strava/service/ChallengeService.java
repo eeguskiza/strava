@@ -74,17 +74,18 @@ public class ChallengeService {
         return acceptedChallenges.getOrDefault(email, new ArrayList<>());
     }
 
-    // Get challenge progress
-    public Map<Challenge, Double> getChallengeProgress(String token) {
+ // Get challenge progress
+    public List<Map<String, Object>> getChallengeProgress(String token) {
         String email = authService.getEmailByToken(token); // Usamos AuthService para obtener el email por token
         if (email == null) {
             throw new IllegalArgumentException("Invalid token or user not logged in.");
         }
 
+        List<Map<String, Object>> progressList = new ArrayList<>();
         List<Challenge> challenges = acceptedChallenges.getOrDefault(email, new ArrayList<>());
         List<TrainingSession> sessions = TrainingSessionService.userTrainingSessions.getOrDefault(email, new ArrayList<>());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Map<Challenge, Double> challengeProgress = new HashMap<>();
+
         for (Challenge challenge : challenges) {
             double totalDistance = 0;
             double totalTime = 0;
@@ -113,10 +114,17 @@ public class ChallengeService {
                 progress = (totalTime / challenge.getTargetTime()) * 100;
             }
 
-            
-            challengeProgress.put(challenge, Math.min(progress, 100));
+            Map<String, Object> challengeProgress = new HashMap<>();
+            challengeProgress.put("challengeName", challenge.getName());
+            challengeProgress.put("progress", Math.min(progress, 100));
+            challengeProgress.put("targetDistance", challenge.getTargetDistance());
+            challengeProgress.put("targetTime", challenge.getTargetTime());
+            challengeProgress.put("achievedDistance", totalDistance);
+            challengeProgress.put("achievedTime", totalTime);
+
+            progressList.add(challengeProgress);
         }
 
-        return challengeProgress;
+        return progressList;
     }
 }

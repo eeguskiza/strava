@@ -62,8 +62,8 @@ public class ChallengeFacade {
     @PostMapping("/accept")
     public ResponseEntity<String> acceptChallenge(
             @RequestHeader("token") String token,
-            @RequestBody ChallengeDTO challengeDTO) {
-        String challengeName = challengeDTO.getName();
+            @RequestBody Map<String, String> body) {
+        String challengeName = body.get("challengeName");
         String result = challengeService.acceptChallenge(token, challengeName);  // Cambiado de authService a challengeService
 
         if ("Challenge accepted successfully.".equals(result)) {
@@ -87,16 +87,12 @@ public class ChallengeFacade {
         return new ResponseEntity<>(acceptedChallengesDTOs, HttpStatus.OK);
     }
 
-    // Get challenge progress
+ // Get challenge progress
     @GetMapping("/progress")
     public ResponseEntity<?> getChallengeProgress(@RequestHeader("token") String token) {
         try {
-            Map<Challenge, Double> progress = challengeService.getChallengeProgress(token);  // Cambiado de authService a challengeService
-			Map<ChallengeDTO, Double>progressdtos = new HashMap<>();
-			for (Map.Entry<Challenge, Double> entry : progress.entrySet()) {
-				progressdtos.put(challengeToDTO(entry.getKey()), entry.getValue());
-			}
-            return new ResponseEntity<>(progressdtos, HttpStatus.OK);
+            List<Map<String, Object>> progress = challengeService.getChallengeProgress(token);  // Cambiado de authService a challengeService
+            return new ResponseEntity<>(progress, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
