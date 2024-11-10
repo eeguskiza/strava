@@ -15,20 +15,10 @@ public class AuthService {
     private Map<String, String> activeTokens = new HashMap<>();
 
     // Registers a new user
-    public String register(UserDTO userDTO) {
-        if (registeredUsers.containsKey(userDTO.getEmail())) {
+    public String register(User user) {
+        if (registeredUsers.containsKey(user.getEmail())) {
             return "User already registered.";
         }
-
-        User user = new User();
-        user.setEmail(userDTO.getEmail());
-        user.setName(userDTO.getName());
-        user.setBirthDate(userDTO.getBirthDate());
-        user.setWeight(userDTO.getWeight());
-        user.setHeight(userDTO.getHeight());
-        user.setMaxHeartRate(userDTO.getMaxHeartRate());
-        user.setRestHeartRate(userDTO.getRestHeartRate());
-
         registeredUsers.put(user.getEmail(), user);
         return "User registered successfully.";
     }

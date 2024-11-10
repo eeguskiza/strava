@@ -2,6 +2,7 @@ package com.deusto.strava.facade;
 
 import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.dto.UserDTO;
+import com.deusto.strava.entity.User;
 import com.deusto.strava.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,7 +38,18 @@ public class AuthFacade {
     public ResponseEntity<String> register(
             @Parameter(name = "userDTO", description = "User registration details", required = true)
             @RequestBody UserDTO userDTO) {
-        String result = authService.register(userDTO);
+
+            User user = new User();
+            user.setEmail(userDTO.getEmail());
+            user.setName(userDTO.getName());
+            user.setBirthDate(userDTO.getBirthDate());
+            user.setWeight(userDTO.getWeight());
+            user.setHeight(userDTO.getHeight());
+            user.setMaxHeartRate(userDTO.getMaxHeartRate());
+            user.setRestHeartRate(userDTO.getRestHeartRate());
+
+            String result = authService.register(user);
+
         if ("User registered successfully.".equals(result)) {
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } else {
