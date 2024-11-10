@@ -18,10 +18,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter'          // Núcleo de Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'      // Necesario para crear APIs REST
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // Opcional, solo si necesitas JPA
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Dependencias para testing
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 
 tasks.named('test') {
     useJUnitPlatform()
