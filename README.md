@@ -75,10 +75,15 @@ This project is documented using UML class diagrams and sequence diagrams to ill
 
 ## 🛠️ Setup Instructions
 
-1. **Clone the repository**:
+1. **Clone the repository and build it**:
    ```bash
    git clone https://github.com/yourusername/strava-project.git
    cd strava-project
+   ./gradlew build
+   ```
+   
+2. **Run the application**:
+    ```bash
    ./gradlew run
     ```
 

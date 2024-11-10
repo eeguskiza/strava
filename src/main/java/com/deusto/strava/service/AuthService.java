@@ -49,12 +49,10 @@ public class AuthService {
         return token;
     }
 
-    public String logout(String token) {
-        if (activeTokens.remove(token) != null) {
-            return "User logged out successfully.";
-        }
-        return "Invalid token.";
+    public boolean logout(String token) {
+        return activeTokens.remove(token) != null;
     }
+
 
     private String hashPassword(String password) {
         try {

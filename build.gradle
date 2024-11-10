@@ -18,13 +18,18 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'          // Núcleo de Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-web'      // Necesario para crear APIs REST
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // Opcional, solo si necesitas JPA
+    // Spring Boot Starter Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Dependencias para testing
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // SpringDoc OpenAPI for Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+    // Dependencias para pruebas
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Incluye JUnit 5 por defecto
+
 }
+
+
 
 
 tasks.named('test') {
