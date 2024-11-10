@@ -1,9 +1,6 @@
 package com.deusto.strava.facade;
 
-import com.deusto.strava.dto.TrainingSessionDTO;
-import com.deusto.strava.dto.UserDTO;
-import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.dto.LogoutRequestDTO;
+import com.deusto.strava.dto.*;
 import com.deusto.strava.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -119,4 +117,70 @@ public class AuthFacade {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @PostMapping("/challenges")
+    public ResponseEntity<String> setUpChallenge(
+            @RequestHeader("token") String token,
+            @RequestBody ChallengeDTO challengeDTO) {
+        String result = authService.setUpChallenge(token, challengeDTO);
+
+        if ("Challenge set up successfully.".equals(result)) {
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/challenges/active")
+    public ResponseEntity<?> downloadActiveChallenges(
+            @RequestHeader("token") String token,
+            @RequestParam(required = false) String sport,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        try {
+            List<ChallengeDTO> activeChallenges = authService.downloadActiveChallenges(token, sport, startDate, endDate);
+            return new ResponseEntity<>(activeChallenges, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+    @PostMapping("/challenges/accept")
+    public ResponseEntity<String> acceptChallenge(
+            @RequestHeader("token") String token,
+            @RequestBody Map<String, String> body) {
+        String challengeName = body.get("challengeName");
+        String result = authService.acceptChallenge(token, challengeName);
+
+        if ("Challenge accepted successfully.".equals(result)) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } else if (result.equals("Challenge not found.") || result.equals("No challenges found for this user.")) {
+            return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/challenges/accepted")
+    public ResponseEntity<?> getAcceptedChallenges(@RequestHeader("token") String token) {
+        try {
+            List<ChallengeDTO> acceptedChallengesList = authService.getAcceptedChallenges(token);
+            return new ResponseEntity<>(acceptedChallengesList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/challenges/progress")
+    public ResponseEntity<?> getChallengeProgress(@RequestHeader("token") String token) {
+        try {
+            List<Map<String, Object>> progressList = authService.getChallengeProgress(token);
+            return new ResponseEntity<>(progressList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+
+
+
 }
