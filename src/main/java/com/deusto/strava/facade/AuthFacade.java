@@ -5,6 +5,7 @@
  */
 package com.deusto.strava.facade;
 
+import com.deusto.strava.dto.TrainingSessionDTO;
 import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.dto.LogoutRequestDTO;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -92,4 +94,32 @@ public class AuthFacade {
             return new ResponseEntity<>("Invalid token or user not logged in.", HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @PostMapping("/sessions")
+    public ResponseEntity<String> createTrainingSession(
+            @RequestHeader("token") String token,
+            @RequestBody TrainingSessionDTO sessionDTO) {
+        String result = authService.createTrainingSession(token, sessionDTO);
+
+        if ("Training session created successfully.".equals(result)) {
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<?> queryTrainingSessions(
+            @RequestHeader("token") String token,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        try {
+            List<TrainingSessionDTO> sessions = authService.queryTrainingSessions(token, startDate, endDate);
+            return new ResponseEntity<>(sessions, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+
 }

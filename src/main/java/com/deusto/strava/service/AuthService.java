@@ -1,5 +1,6 @@
 package com.deusto.strava.service;
 
+import com.deusto.strava.dto.TrainingSessionDTO;
 import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.entity.User;
 import org.springframework.stereotype.Service;
@@ -7,8 +8,11 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -70,5 +74,41 @@ public class AuthService {
 
     private String generateToken() {
         return java.util.UUID.randomUUID().toString();
+    }
+
+    private Map<String, List<TrainingSessionDTO>> userTrainingSessions = new HashMap<>();
+
+    public String createTrainingSession(String token, TrainingSessionDTO sessionDTO) {
+        // Verifica que el token esté activo
+        String email = activeTokens.get(token);
+        if (email == null) {
+            return "Invalid token or user not logged in.";
+        }
+
+        // Añade la sesión al usuario
+        userTrainingSessions.putIfAbsent(email, new ArrayList<>());
+        userTrainingSessions.get(email).add(sessionDTO);
+
+        return "Training session created successfully.";
+    }
+
+    public List<TrainingSessionDTO> queryTrainingSessions(String token, String startDate, String endDate) {
+        // Verifica que el token esté activo y obtiene el email asociado
+        String email = activeTokens.get(token);
+        if (email == null) {
+            throw new IllegalArgumentException("Invalid token or user not logged in.");
+        }
+
+        // Obtiene la lista de sesiones de entrenamiento del usuario
+        List<TrainingSessionDTO> sessions = userTrainingSessions.getOrDefault(email, new ArrayList<>());
+
+        // Filtra las sesiones por fecha, si se proporciona startDate y endDate
+        if (startDate != null && endDate != null) {
+            return sessions.stream()
+                    .filter(session -> session.getStartDate().compareTo(startDate) >= 0 && session.getStartDate().compareTo(endDate) <= 0)
+                    .collect(Collectors.toList());
+        }
+
+        return sessions; // Devuelve todas las sesiones si no hay filtros de fecha
     }
 }
