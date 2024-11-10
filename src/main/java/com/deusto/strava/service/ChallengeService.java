@@ -16,7 +16,6 @@ public class ChallengeService {
 
     private Map<String, List<Challenge>> userChallenges = new HashMap<>();
     private Map<String, List<Challenge>> acceptedChallenges = new HashMap<>();
-    private Map<String, List<TrainingSessionDTO>> userTrainingSessions = new HashMap<>();
 
     // Set up a new challenge
     public String setUpChallenge(String token, Challenge challenge) {
@@ -84,14 +83,14 @@ public class ChallengeService {
 
         List<Map<String, Object>> progressList = new ArrayList<>();
         List<Challenge> challenges = acceptedChallenges.getOrDefault(email, new ArrayList<>());
-        List<TrainingSessionDTO> sessions = userTrainingSessions.getOrDefault(email, new ArrayList<>());
+        List<TrainingSession> sessions = TrainingSessionService.userTrainingSessions.getOrDefault(email, new ArrayList<>());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         for (Challenge challenge : challenges) {
             double totalDistance = 0;
             double totalTime = 0;
 
-            for (TrainingSessionDTO session : sessions) {
+            for (TrainingSession session : sessions) {
                 try {
                     Date sessionDate = dateFormat.parse(session.getStartDate());
                     Date challengeStartDate = dateFormat.parse(challenge.getStartDate());

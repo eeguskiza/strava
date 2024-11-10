@@ -15,7 +15,7 @@ public class TrainingSessionService {
     @Autowired
     private AuthService authService; // Inyectamos AuthService
 
-    private Map<String, List<TrainingSession>> userTrainingSessions = new HashMap<>();
+    protected static Map<String, List<TrainingSession>> userTrainingSessions = new HashMap<>();
 
     // Creates a new training session for the authenticated user
     public String createTrainingSession(String token, TrainingSession session) {
