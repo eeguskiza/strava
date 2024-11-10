@@ -1,6 +1,6 @@
 package com.deusto.strava.service;
 
-import com.deusto.strava.dto.ChallengeDTO;
+import com.deusto.strava.entity.*;
 import com.deusto.strava.dto.TrainingSessionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,30 +14,30 @@ public class ChallengeService {
     @Autowired
     private AuthService authService; // Inyectamos AuthService
 
-    private Map<String, List<ChallengeDTO>> userChallenges = new HashMap<>();
-    private Map<String, List<ChallengeDTO>> acceptedChallenges = new HashMap<>();
+    private Map<String, List<Challenge>> userChallenges = new HashMap<>();
+    private Map<String, List<Challenge>> acceptedChallenges = new HashMap<>();
     private Map<String, List<TrainingSessionDTO>> userTrainingSessions = new HashMap<>();
 
     // Set up a new challenge
-    public String setUpChallenge(String token, ChallengeDTO challengeDTO) {
+    public String setUpChallenge(String token, Challenge challenge) {
         String email = authService.getEmailByToken(token); // Usamos AuthService para obtener el email por token
         if (email == null) {
             return "Invalid token or user not logged in.";
         }
 
         userChallenges.putIfAbsent(email, new ArrayList<>());
-        userChallenges.get(email).add(challengeDTO);
+        userChallenges.get(email).add(challenge);
         return "Challenge set up successfully.";
     }
 
     // Download active challenges for the user
-    public List<ChallengeDTO> downloadActiveChallenges(String token, String sport, String startDate, String endDate) {
+    public List<Challenge> downloadActiveChallenges(String token, String sport, String startDate, String endDate) {
         String email = authService.getEmailByToken(token); // Usamos AuthService para obtener el email por token
         if (email == null) {
             throw new IllegalArgumentException("Invalid token or user not logged in.");
         }
 
-        List<ChallengeDTO> challenges = userChallenges.getOrDefault(email, new ArrayList<>());
+        List<Challenge> challenges = userChallenges.getOrDefault(email, new ArrayList<>());
         // Aquí puedes agregar el filtro por fechas y deporte si se proporciona
         return challenges;
     }
@@ -49,8 +49,8 @@ public class ChallengeService {
             return "Invalid token or user not logged in.";
         }
 
-        List<ChallengeDTO> userChallengesList = userChallenges.getOrDefault(email, new ArrayList<>());
-        ChallengeDTO challengeToAccept = userChallengesList.stream()
+        List<Challenge> userChallengesList = userChallenges.getOrDefault(email, new ArrayList<>());
+        Challenge challengeToAccept = userChallengesList.stream()
                 .filter(challenge -> challenge.getName().equalsIgnoreCase(challengeName))
                 .findFirst()
                 .orElse(null);
@@ -66,7 +66,7 @@ public class ChallengeService {
     }
 
     // Get accepted challenges for the user
-    public List<ChallengeDTO> getAcceptedChallenges(String token) {
+    public List<Challenge> getAcceptedChallenges(String token) {
         String email = authService.getEmailByToken(token); // Usamos AuthService para obtener el email por token
         if (email == null) {
             throw new IllegalArgumentException("Invalid token or user not logged in.");
@@ -83,11 +83,11 @@ public class ChallengeService {
         }
 
         List<Map<String, Object>> progressList = new ArrayList<>();
-        List<ChallengeDTO> challenges = acceptedChallenges.getOrDefault(email, new ArrayList<>());
+        List<Challenge> challenges = acceptedChallenges.getOrDefault(email, new ArrayList<>());
         List<TrainingSessionDTO> sessions = userTrainingSessions.getOrDefault(email, new ArrayList<>());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        for (ChallengeDTO challenge : challenges) {
+        for (Challenge challenge : challenges) {
             double totalDistance = 0;
             double totalTime = 0;
 

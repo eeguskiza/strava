@@ -57,14 +57,22 @@ public class AuthFacade {
         }
     }
 
-    // Logout endpoint
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody String token) {
+        // Verifica si el token es válido y está asociado a un usuario registrado
+        String email = authService.getEmailByToken(token);
+        if (email == null) {
+            return new ResponseEntity<>("Invalid token or user not logged in.", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Si el token es válido, proceder a eliminarlo
         boolean result = authService.logout(token);
+
         if (result) {
             return new ResponseEntity<>("User logged out successfully.", HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error occurred while logging out.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

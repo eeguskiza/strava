@@ -1,6 +1,6 @@
 package com.deusto.strava.facade;
 
-import com.deusto.strava.dto.ChallengeDTO;
+import com.deusto.strava.entity.*;
 import com.deusto.strava.service.ChallengeService;
 import com.deusto.strava.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,8 @@ public class ChallengeFacade {
     @PostMapping
     public ResponseEntity<String> setUpChallenge(
             @RequestHeader("token") String token,
-            @RequestBody ChallengeDTO challengeDTO) {
-        String result = challengeService.setUpChallenge(token, challengeDTO);  // Cambiado de authService a challengeService
+            @RequestBody Challenge challenge) {
+        String result = challengeService.setUpChallenge(token, challenge);  // Cambiado de authService a challengeService
         if ("Challenge set up successfully.".equals(result)) {
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } else {
@@ -40,12 +40,12 @@ public class ChallengeFacade {
 
     // Get active challenges
     @GetMapping("/active")
-    public ResponseEntity<List<ChallengeDTO>> downloadActiveChallenges(
+    public ResponseEntity<List<Challenge>> downloadActiveChallenges(
             @RequestHeader("token") String token,
             @RequestParam(required = false) String sport,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
-        List<ChallengeDTO> challenges = challengeService.downloadActiveChallenges(token, sport, startDate, endDate);  // Cambiado de authService a challengeService
+        List<Challenge> challenges = challengeService.downloadActiveChallenges(token, sport, startDate, endDate);  // Cambiado de authService a challengeService
         return new ResponseEntity<>(challenges, HttpStatus.OK);
     }
 
@@ -68,9 +68,9 @@ public class ChallengeFacade {
 
     // Get accepted challenges
     @GetMapping("/accepted")
-    public ResponseEntity<List<ChallengeDTO>> getAcceptedChallenges(
+    public ResponseEntity<List<Challenge>> getAcceptedChallenges(
             @RequestHeader("token") String token) {
-        List<ChallengeDTO> acceptedChallenges = challengeService.getAcceptedChallenges(token);  // Cambiado de authService a challengeService
+        List<Challenge> acceptedChallenges = challengeService.getAcceptedChallenges(token);  // Cambiado de authService a challengeService
         return new ResponseEntity<>(acceptedChallenges, HttpStatus.OK);
     }
 

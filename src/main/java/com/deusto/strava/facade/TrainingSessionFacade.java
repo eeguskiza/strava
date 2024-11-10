@@ -1,6 +1,6 @@
 package com.deusto.strava.facade;
 
-import com.deusto.strava.dto.TrainingSessionDTO;
+import com.deusto.strava.entity.TrainingSession;
 import com.deusto.strava.service.TrainingSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,8 +24,8 @@ public class TrainingSessionFacade {
     @PostMapping
     public ResponseEntity<String> createTrainingSession(
             @RequestHeader("token") String token,
-            @RequestBody TrainingSessionDTO sessionDTO) {
-        String result = trainingSessionService.createTrainingSession(token, sessionDTO);
+            @RequestBody TrainingSession session) {
+        String result = trainingSessionService.createTrainingSession(token, session);
 
         if ("Training session created successfully.".equals(result)) {
             return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -41,7 +41,7 @@ public class TrainingSessionFacade {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         try {
-            List<TrainingSessionDTO> sessions = trainingSessionService.queryTrainingSessions(token, startDate, endDate);
+            List<TrainingSession> sessions = trainingSessionService.queryTrainingSessions(token, startDate, endDate);
             return new ResponseEntity<>(sessions, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);

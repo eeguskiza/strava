@@ -45,7 +45,6 @@ public class AuthService {
         return token;
     }
 
-    // Logs out a user by removing their token from active tokens
     public boolean logout(String token) {
         return activeTokens.remove(token) != null;
     }
