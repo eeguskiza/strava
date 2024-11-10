@@ -10,13 +10,12 @@ public class User {
     private float height;
     private int maxHeartRate = 0; // Inicializa a 0
     private int restHeartRate = 0; // Inicializa a 0
-    private String passwordHash; // We will store the hash of the password in order to avoid storing it in plain text
 
     public User() {
 
     }
 
-    public User(String email, String name, Date birthDate, float weight, float height, String password) {
+    public User(String email, String name, Date birthDate, float weight, float height) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -24,7 +23,6 @@ public class User {
         this.height = height;
         this.maxHeartRate = 0;
         this.restHeartRate = 0;
-        this.passwordHash = password;
     }
 
     public String getEmail() {
@@ -81,13 +79,5 @@ public class User {
 
     public void setMaxHeartRate(int maxHeartRate) {
         this.maxHeartRate = maxHeartRate;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 }

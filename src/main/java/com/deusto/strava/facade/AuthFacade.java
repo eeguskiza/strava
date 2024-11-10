@@ -1,8 +1,3 @@
-/**
- * This code is based on solutions provided by ChatGPT 4.0 and
- * adapted using GitHub Copilot. It has been thoroughly reviewed
- * and validated to ensure correctness and that it is free of errors.
- */
 package com.deusto.strava.facade;
 
 import com.deusto.strava.dto.TrainingSessionDTO;
@@ -58,21 +53,23 @@ public class AuthFacade {
     // Login endpoint
     @Operation(
             summary = "Login to the system",
-            description = "Allows a user to login by providing email and password. Returns a token if successful.",
+            description = "Allows a user to login by providing email. Returns a token if successful.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK: Login successful, returns a token"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid credentials, login failed")
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid email, login failed")
             }
     )
     @PostMapping("/login")
     public ResponseEntity<String> login(
-            @Parameter(name = "loginRequest", description = "User's login credentials", required = true)
+            @Parameter(name = "loginRequest", description = "User's login email", required = true)
             @RequestBody LoginRequestDTO loginRequest) {
-        Optional<String> token = Optional.ofNullable(authService.login(loginRequest.getEmail(), loginRequest.getPassword()));
+        String token = authService.login(loginRequest.getEmail());
 
-        return token
-                .map(t -> new ResponseEntity<>(t, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+        if (token.equals("User not found.")) {
+            return new ResponseEntity<>(token, HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(token, HttpStatus.OK);
+        }
     }
 
     // Logout endpoint
@@ -95,6 +92,7 @@ public class AuthFacade {
         }
     }
 
+    // Endpoint to create a training session
     @PostMapping("/sessions")
     public ResponseEntity<String> createTrainingSession(
             @RequestHeader("token") String token,
@@ -108,6 +106,7 @@ public class AuthFacade {
         }
     }
 
+    // Endpoint to query training sessions with optional date filtering
     @GetMapping("/sessions")
     public ResponseEntity<?> queryTrainingSessions(
             @RequestHeader("token") String token,
@@ -120,6 +119,4 @@ public class AuthFacade {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
-
-
 }

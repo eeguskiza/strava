@@ -10,7 +10,6 @@ public class UserDTO {
     private float height;
     private int maxHeartRate;
     private int restHeartRate;
-    private String password; // Contraseña
 
     public UserDTO() {
 
@@ -24,7 +23,6 @@ public class UserDTO {
         this.height = height;
         this.maxHeartRate = 0;
         this.restHeartRate = 0;
-        this.password = password;
     }
 
     public String getEmail() {
@@ -81,13 +79,5 @@ public class UserDTO {
 
     public void setRestHeartRate(int restHeartRate) {
         this.restHeartRate = restHeartRate;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }
