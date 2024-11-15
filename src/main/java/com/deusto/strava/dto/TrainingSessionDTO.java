@@ -1,71 +1,41 @@
 package com.deusto.strava.dto;
 
+import java.util.Date;
+
 public class TrainingSessionDTO {
-    private String title;
+    private String id;
     private String sport;
     private float distance;
-    private String startDate;
-    private String startTime;
+    private Date startDate;
     private float duration;
 
-    public TrainingSessionDTO() {
-
-    }
-
-    public TrainingSessionDTO(String title, String sport, float distance, String startDate, String startTime, float duration) {
-        this.title = title;
+    // Constructor
+    public TrainingSessionDTO(String id, String sport, float distance, Date startDate, float duration) {
+        this.id = id;
         this.sport = sport;
         this.distance = distance;
         this.startDate = startDate;
-        this.startTime = startTime;
         this.duration = duration;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    // Getters y Setters
+    public String getId() {
+        return id;
     }
 
     public String getSport() {
         return sport;
     }
 
-    public void setSport(String sport) {
-        this.sport = sport;
-    }
-
     public float getDistance() {
         return distance;
     }
 
-    public void setDistance(float distance) {
-        this.distance = distance;
-    }
-
-    public String getStartDate() {
+    public Date getStartDate() {
         return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
     }
 
     public float getDuration() {
         return duration;
-    }
-
-    public void setDuration(float duration) {
-        this.duration = duration;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
     }
 }

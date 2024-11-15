@@ -1,6 +1,8 @@
 package com.deusto.strava.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class User {
     private String email;
@@ -8,14 +10,20 @@ public class User {
     private Date birthDate;
     private float weight;
     private float height;
-    private int maxHeartRate = 0; // Inicializa a 0
-    private int restHeartRate = 0; // Inicializa a 0
+    private int maxHeartRate;
+    private int restHeartRate;
 
+    // Lista de sesiones de entrenamiento
+    private List<TrainingSession> trainingSessions = new ArrayList<>();
+
+    // Lista de desafíos en los que participa
+    private List<Challenge> challenges = new ArrayList<>();
+
+    // Constructor
     public User() {
-
     }
 
-    public User(String email, String name, Date birthDate, float weight, float height) {
+    public User(String email, String name, float weight, float height, Date birthDate) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -23,8 +31,20 @@ public class User {
         this.height = height;
         this.maxHeartRate = 0;
         this.restHeartRate = 0;
+        this.trainingSessions = new ArrayList<>();
+        this.challenges = new ArrayList<>();
     }
 
+    // Métodos
+    public void addTrainingSession(TrainingSession session) {
+        this.trainingSessions.add(session);
+    }
+
+    public void addChallenge(Challenge challenge) {
+        this.challenges.add(challenge);
+    }
+
+    // Getters y Setters
     public String getEmail() {
         return email;
     }
@@ -39,14 +59,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Date getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
     }
 
     public float getWeight() {
@@ -65,6 +77,14 @@ public class User {
         this.height = height;
     }
 
+    public int getMaxHeartRate() {
+        return maxHeartRate;
+    }
+
+    public void setMaxHeartRate(int maxHeartRate) {
+        this.maxHeartRate = maxHeartRate;
+    }
+
     public int getRestHeartRate() {
         return restHeartRate;
     }
@@ -73,11 +93,19 @@ public class User {
         this.restHeartRate = restHeartRate;
     }
 
-    public int getMaxHeartRate() {
-        return maxHeartRate;
+    public Date getBirthDate() {
+        return birthDate;
     }
 
-    public void setMaxHeartRate(int maxHeartRate) {
-        this.maxHeartRate = maxHeartRate;
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public List<TrainingSession> getTrainingSessions() {
+        return trainingSessions;
+    }
+
+    public List<Challenge> getChallenges() {
+        return challenges;
     }
 }

@@ -1,6 +1,7 @@
 package com.deusto.strava.dto;
 
 import java.util.Date;
+import java.util.List;
 
 public class UserDTO {
     private String email;
@@ -10,21 +11,26 @@ public class UserDTO {
     private float height;
     private int maxHeartRate;
     private int restHeartRate;
+    private List<String> trainingSessionIds;
+    private List<String> challengeIds;
 
-    public UserDTO() {
+    // Constructor vacío para la deserialización
+    public UserDTO() {}
 
-    }
-
-    public UserDTO(String email, String name, Date birthDate, float weight, float height, String password) {
+    // Constructor con todos los campos
+    public UserDTO(String email, String name, Date birthDate, float weight, float height, int maxHeartRate, int restHeartRate, List<String> trainingSessionIds, List<String> challengeIds) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
         this.weight = weight;
         this.height = height;
-        this.maxHeartRate = 0;
-        this.restHeartRate = 0;
+        this.maxHeartRate = maxHeartRate;
+        this.restHeartRate = restHeartRate;
+        this.trainingSessionIds = trainingSessionIds;
+        this.challengeIds = challengeIds;
     }
 
+    // Getters y Setters
     public String getEmail() {
         return email;
     }
@@ -41,20 +47,20 @@ public class UserDTO {
         this.name = name;
     }
 
-    public float getWeight() {
-        return weight;
-    }
-
-    public void setWeight(float weight) {
-        this.weight = weight;
-    }
-
     public Date getBirthDate() {
         return birthDate;
     }
 
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
     }
 
     public float getHeight() {
@@ -79,5 +85,21 @@ public class UserDTO {
 
     public void setRestHeartRate(int restHeartRate) {
         this.restHeartRate = restHeartRate;
+    }
+
+    public List<String> getTrainingSessionIds() {
+        return trainingSessionIds;
+    }
+
+    public void setTrainingSessionIds(List<String> trainingSessionIds) {
+        this.trainingSessionIds = trainingSessionIds;
+    }
+
+    public List<String> getChallengeIds() {
+        return challengeIds;
+    }
+
+    public void setChallengeIds(List<String> challengeIds) {
+        this.challengeIds = challengeIds;
     }
 }

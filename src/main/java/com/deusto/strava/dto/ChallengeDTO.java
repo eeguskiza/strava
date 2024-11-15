@@ -1,70 +1,59 @@
 package com.deusto.strava.dto;
 
+import java.util.Date;
+
 public class ChallengeDTO {
+    private String id;
+    private String creatorName;
     private String name;
     private String sport;
-    private double targetDistance;
-    private double targetTime;
-    private String startDate;
-    private String endDate;
+    private float targetDistance;
+    private float targetTime;
+    private Date startDate;
+    private Date endDate;
 
-    public ChallengeDTO() {
-    }
-
-    public ChallengeDTO(String name, String sport, double targetDistance, double targetTime, String startDate, String endDate) {
+    // Constructor
+    public ChallengeDTO(String id, String creatorName, String name, String sport, float targetDistance, float targetTime, Date startDate, Date endDate) {
+        this.id = id;
+        this.creatorName = creatorName;
         this.name = name;
         this.sport = sport;
         this.targetDistance = targetDistance;
         this.targetTime = targetTime;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    // Getters y Setters
+    public String getId() {
+        return id;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getSport() {
         return sport;
     }
 
-    public void setSport(String sport) {
-        this.sport = sport;
-    }
-
-    public double getTargetTime() {
-        return targetTime;
-    }
-
-    public void setTargetTime(double targetTime) {
-        this.targetTime = targetTime;
-    }
-
-    public double getTargetDistance() {
+    public float getTargetDistance() {
         return targetDistance;
     }
 
-    public void setTargetDistance(double targetDistance) {
-        this.targetDistance = targetDistance;
+    public float getTargetTime() {
+        return targetTime;
     }
 
-    public String getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
     }
 }

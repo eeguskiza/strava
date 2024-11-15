@@ -1,51 +1,62 @@
 package com.deusto.strava.service;
 
-import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class AuthService {
 
-    private Map<String, User> registeredUsers = new HashMap<>();
-    private Map<String, String> activeTokens = new HashMap<>();
+    // Simulated user repository
+    private final Map<String, User> userRepository = new HashMap<>();
 
-    // Registers a new user
-    public String register(User user) {
-        if (registeredUsers.containsKey(user.getEmail())) {
-            return "User already registered.";
+    // Simulated token store
+    private final Map<String, String> tokenStore = new HashMap<>();
+
+    // Register a new user
+    public boolean register(User user) {
+        if (user != null && user.getEmail() != null && !userRepository.containsKey(user.getEmail())) {
+            userRepository.put(user.getEmail(), user);
+            return true;
         }
-        registeredUsers.put(user.getEmail(), user);
-        return "User registered successfully.";
+        return false;
     }
 
-    // Logs in a user by their email, generating a token if successful
+    // Login a user and generate a token
     public String login(String email) {
-        User user = registeredUsers.get(email);
-        if (user == null) {
-            return "User not found.";
+        User user = userRepository.get(email);
+        if (user != null) {
+            String token = generateToken();
+            tokenStore.put(token, email); // Associate the token with the user's email
+            return token;
         }
-
-        String token = generateToken();
-        activeTokens.put(token, email);
-        return token;
+        return null;
     }
 
+    // Logout a user by removing the token
     public boolean logout(String token) {
-        return activeTokens.remove(token) != null;
+        if (tokenStore.containsKey(token)) {
+            tokenStore.remove(token);
+            return true;
+        }
+        return false;
     }
 
-    // Generates a unique token for session management
+    // Private helper method to generate a unique token
     private String generateToken() {
         return UUID.randomUUID().toString();
     }
 
-    public String getEmailByToken(String token) {
-        return activeTokens.get(token);
+    // Method to retrieve a user by token (if needed in the future)
+    public Optional<User> getUserByToken(String token) {
+        String email = tokenStore.get(token);
+        if (email != null) {
+            return Optional.ofNullable(userRepository.get(email));
+        }
+        return Optional.empty();
     }
-
 }
