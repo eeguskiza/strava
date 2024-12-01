@@ -1,43 +1,80 @@
 package com.deusto.strava.service;
 
+import com.deusto.strava.dto.LoginRequestDTO;
+import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthService {
 
-    // Simulated user repository
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+    // Simulated user repository to store registered users
     private final Map<String, User> userRepository = new HashMap<>();
 
-    // Simulated token store
-    private final Map<String, String> tokenStore = new HashMap<>();
+    // Simulated token store to manage active user sessions
+    private final Map<String, User> tokenStore = new HashMap<>();
 
-    // Register a new user
-    public boolean register(User user) {
+    /**
+     * Converts a UserDTO object to a User entity.
+     *
+     * @param userDTO the DTO containing user data.
+     * @return the User entity created from the DTO.
+     */
+    private User dtoToUser(LoginRequestDTO userDTO) {
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setName(userDTO.getName());
+        user.setWeight(userDTO.getWeight());
+        user.setHeight(userDTO.getHeight());
+        user.setBirthDate(java.sql.Date.valueOf(String.valueOf(userDTO.getBirthDate()))); // Converts String to Date
+        return user;
+    }
+
+    /**
+     * Registers a new user if the email is unique.
+     *
+     * @param userDTO the DTO containing the user's registration data.
+     * @return true if the user is successfully registered, false otherwise.
+     */
+    public boolean register(LoginRequestDTO userDTO) {
+        User user = dtoToUser(userDTO);
         if (user != null && user.getEmail() != null && !userRepository.containsKey(user.getEmail())) {
             userRepository.put(user.getEmail(), user);
+            logger.info("User registered successfully: {}", user.getEmail());
             return true;
         }
         return false;
     }
 
-    // Login a user and generate a token
+    /**
+     * Logs in a user by their email and generates a session token.
+     *
+     * @param email the email of the user attempting to log in.
+     * @return a token if the login is successful, null otherwise.
+     */
     public String login(String email) {
         User user = userRepository.get(email);
         if (user != null) {
-            String token = generateToken();
-            tokenStore.put(token, email); // Associate the token with the user's email
+            String token = generateToken();  // Generate a random token for the session
+            tokenStore.put(token, user);     // Store the token and associate it with the user
             return token;
         }
         return null;
     }
 
-    // Logout a user by removing the token
+    /**
+     * Logs out a user by removing their token from the store.
+     *
+     * @param token the session token of the user.
+     * @return true if the logout is successful, false otherwise.
+     */
     public boolean logout(String token) {
         if (tokenStore.containsKey(token)) {
             tokenStore.remove(token);
@@ -46,17 +83,43 @@ public class AuthService {
         return false;
     }
 
-    // Private helper method to generate a unique token
-    private String generateToken() {
-        return UUID.randomUUID().toString();
+    /**
+     * Adds a user to the repository if they do not already exist.
+     *
+     * @param user the user entity to be added.
+     */
+    public void addUser(User user) {
+        if (user != null) {
+            userRepository.putIfAbsent(user.getEmail(), user);
+        }
     }
 
-    // Method to retrieve a user by token (if needed in the future)
-    public Optional<User> getUserByToken(String token) {
-        String email = tokenStore.get(token);
-        if (email != null) {
-            return Optional.ofNullable(userRepository.get(email));
-        }
-        return Optional.empty();
+    /**
+     * Retrieves a user based on their session token.
+     *
+     * @param token the session token of the user.
+     * @return the User entity associated with the token.
+     */
+    public User getUserByToken(String token) {
+        return tokenStore.get(token);
+    }
+
+    /**
+     * Retrieves a user based on their email address.
+     *
+     * @param email the email address of the user.
+     * @return the User entity associated with the email.
+     */
+    public User getUserByEmail(String email) {
+        return userRepository.get(email);
+    }
+
+    /**
+     * Synchronized method to generate a unique session token.
+     *
+     * @return a unique token as a hexadecimal string.
+     */
+    private static synchronized String generateToken() {
+        return Long.toHexString(System.currentTimeMillis());
     }
 }

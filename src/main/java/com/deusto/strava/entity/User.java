@@ -8,8 +8,8 @@ public class User {
     private String email;
     private String name;
     private Date birthDate;
-    private float weight;
-    private float height;
+    private double weight;
+    private double height;
     private int maxHeartRate;
     private int restHeartRate;
 
@@ -21,9 +21,18 @@ public class User {
 
     // Constructor
     public User() {
+        this.email = "email";
+        this.name = "name";
+        this.birthDate = new Date();
+        this.weight = 0.0;
+        this.height = 0.0;
+        this.maxHeartRate = 0;
+        this.restHeartRate = 0;
+        this.trainingSessions = new ArrayList<>();
+        this.challenges = new ArrayList<>();
     }
 
-    public User(String email, String name, float weight, float height, Date birthDate) {
+    public User(String email, String name, double weight, double height, Date birthDate) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -61,19 +70,19 @@ public class User {
         this.name = name;
     }
 
-    public float getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
-    public float getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void setHeight(float height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 

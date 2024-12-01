@@ -1,6 +1,8 @@
 package com.deusto.strava.facade;
 
 import com.deusto.strava.dto.CredentialsDTO;
+import com.deusto.strava.dto.LoginRequestDTO;
+import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.entity.User;
 import com.deusto.strava.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,13 +34,15 @@ public class AuthController {
                     @ApiResponse(responseCode = "400", description = "Bad Request: Invalid user data"),
             }
     )
+
     @PostMapping("/user")
-    public ResponseEntity<Void> register(@RequestBody User user) {
-        System.out.println("Received User: " + user); // Agregar este log
-        if (authService.register(user)) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<String> register(@RequestBody LoginRequestDTO userDTO) {
+        if (authService.register(userDTO)) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+            //return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User registration failed");
+            //return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -71,12 +75,16 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token"),
             }
     )
+
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody String token) {
+    public ResponseEntity<String> logout(@RequestBody String token) {
         if (authService.logout(token)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Logout successful");
+            //return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or already logged out");
+            //return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
+
 }
