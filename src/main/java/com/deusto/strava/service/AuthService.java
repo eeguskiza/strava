@@ -1,7 +1,6 @@
 package com.deusto.strava.service;
 
 import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +32,15 @@ public class AuthService {
         user.setName(userDTO.getName());
         user.setWeight(userDTO.getWeight());
         user.setHeight(userDTO.getHeight());
-        user.setBirthDate(java.sql.Date.valueOf(String.valueOf(userDTO.getBirthDate()))); // Converts String to Date
+        if (userDTO.getBirthDate() != null) {
+            user.setBirthDate(new java.sql.Date(userDTO.getBirthDate().getTime()));
+        } else {
+            throw new IllegalArgumentException("Birthdate cannot be null");
+        }
+
         return user;
     }
+
 
     /**
      * Registers a new user if the email is unique.

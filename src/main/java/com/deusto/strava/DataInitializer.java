@@ -1,6 +1,6 @@
 package com.deusto.strava;
 
-import com.deusto.strava.entity.User;
+import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +25,44 @@ public class DataInitializer {
 
             // Crear usuarios de ejemplo
             try {
-                User user1 = new User("test", "Erik", 90.0f, 1.87f, dateFormat.parse("2004-08-04"));
-                User user2 = new User("jane.smith@example.com", "Jane Smith", 65.0f, 1.70f, dateFormat.parse("1985-09-20"));
-                User user3 = new User("mike.jones@example.com", "Mike Jones", 85.0f, 1.85f, dateFormat.parse("1995-12-05"));
+                LoginRequestDTO user1 = new LoginRequestDTO(
+                        "eeguskiza",
+                        "Erik",
+                        dateFormat.parse("2004-08-04"),
+                        "password123",
+                        90.0,
+                        1.87,
+                        180,
+                        60,
+                        null,
+                        null
+                );
+
+                LoginRequestDTO user2 = new LoginRequestDTO(
+                        "jane.smith@example.com",
+                        "Jane Smith",
+                        dateFormat.parse("1985-09-20"),
+                        "password456",
+                        65.0,
+                        1.70,
+                        170,
+                        55,
+                        null,
+                        null
+                );
+
+                LoginRequestDTO user3 = new LoginRequestDTO(
+                        "mike.jones@example.com",
+                        "Mike Jones",
+                        dateFormat.parse("1995-12-05"),
+                        "password789",
+                        85.0,
+                        1.85,
+                        175,
+                        58,
+                        null,
+                        null
+                );
 
                 // Registrar usuarios en el sistema
                 authService.register(user1);
