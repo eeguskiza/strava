@@ -34,3 +34,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Gradle files
+.gradle/
+build/
+
+# Logs
+*.log
+
+# Sistema
+*.DS_Store
+Thumbs.db
+
+# Otros archivos innecesarios
+/out/
+
