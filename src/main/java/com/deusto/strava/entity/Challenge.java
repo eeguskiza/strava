@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Challenge {
     private String id;
-    private static int count = 0;
+    public static int count = 0;
     private String creatorName;
     private String name;
     private String sport;
@@ -23,6 +23,10 @@ public class Challenge {
         this.targetTime = targetTime;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    public Challenge() {
+
     }
 
     // Getters y Setters
@@ -56,5 +60,37 @@ public class Challenge {
 
     public Date getEndDate() {
         return endDate;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSport(String sport) {
+        this.sport = sport;
+    }
+
+    public void setTargetDistance(float targetDistance) {
+        this.targetDistance = targetDistance;
+    }
+
+    public void setTargetTime(float targetTime) {
+        this.targetTime = targetTime;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 }
