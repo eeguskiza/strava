@@ -49,3 +49,5 @@ Thumbs.db
 # Otros archivos innecesarios
 /out/
 
+# Archivos de configuración
+
