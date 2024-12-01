@@ -86,14 +86,35 @@ public class AuthService {
      * @return a token if the login is successful, null otherwise.
      */
     public String login(String email, String password) {
-        User user = userRepository.get(email);
-        if (user != null) {
-            String token = generateToken();  // Generate a random token for the session
-            tokenStore.put(token, user);     // Store the token and associate it with the user
-            return token;
+        // Validar que el email y la contraseña no sean nulos o vacíos
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Email or password cannot be null or empty");
         }
-        return null;
+
+        // Verificar en el servicio de Google si las credenciales son válidas
+        boolean isAuthenticatedWithGoogle = googleAuthGateway.verifyCredentials(email, password);
+        if (!isAuthenticatedWithGoogle) {
+            throw new IllegalArgumentException("Invalid credentials on Google. Login denied.");
+        }
+
+        // Buscar el usuario en el repositorio interno
+        User user = userRepository.get(email);
+
+        // Validar si el usuario existe localmente
+        if (user == null) {
+            throw new IllegalArgumentException("User not found for email: " + email);
+        }
+
+        // Generar un token único para la sesión
+        String token = generateToken();
+        tokenStore.put(token, user);
+
+        // Registrar el éxito del inicio de sesión
+        logger.info("User logged in successfully: {}", email);
+
+        return token;
     }
+
 
     /**
      * Logs out a user by removing their token from the store.

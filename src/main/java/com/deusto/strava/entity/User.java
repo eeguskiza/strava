@@ -1,38 +1,52 @@
 package com.deusto.strava.entity;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String name;
-    private Date birthDate;
+
+    @Column(nullable = false)
+    private java.util.Date birthDate;
+
+    @Column(nullable = false)
     private double weight;
+
+    @Column(nullable = false)
     private double height;
+
     private int maxHeartRate;
     private int restHeartRate;
 
-    // Lista de sesiones de entrenamiento
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrainingSession> trainingSessions = new ArrayList<>();
 
-    // Lista de desafíos en los que participa
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "user_challenges",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "challenge_id")
+    )
     private List<Challenge> challenges = new ArrayList<>();
 
-    // Constructor
+    // Constructores
     public User() {
-        this.email = "email";
-        this.name = "name";
-        this.birthDate = new Date();
-        this.weight = 0.0;
-        this.height = 0.0;
-        this.maxHeartRate = 0;
-        this.restHeartRate = 0;
-        this.trainingSessions = new ArrayList<>();
-        this.challenges = new ArrayList<>();
     }
 
-    public User(String email, String name, double weight, double height, Date birthDate) {
+    public User(String email, String name, double weight, double height, java.util.Date birthDate) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -40,8 +54,6 @@ public class User {
         this.height = height;
         this.maxHeartRate = 0;
         this.restHeartRate = 0;
-        this.trainingSessions = new ArrayList<>();
-        this.challenges = new ArrayList<>();
     }
 
     // Métodos
@@ -54,6 +66,14 @@ public class User {
     }
 
     // Getters y Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -102,7 +122,7 @@ public class User {
         this.restHeartRate = restHeartRate;
     }
 
-    public Date getBirthDate() {
+    public java.util.Date getBirthDate() {
         return birthDate;
     }
 
@@ -114,7 +134,15 @@ public class User {
         return trainingSessions;
     }
 
+    public void setTrainingSessions(List<TrainingSession> trainingSessions) {
+        this.trainingSessions = trainingSessions;
+    }
+
     public List<Challenge> getChallenges() {
         return challenges;
+    }
+
+    public void setChallenges(List<Challenge> challenges) {
+        this.challenges = challenges;
     }
 }
