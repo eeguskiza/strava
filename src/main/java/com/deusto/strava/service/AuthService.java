@@ -2,6 +2,7 @@ package com.deusto.strava.service;
 
 import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.entity.User;
+import com.deusto.strava.gateway.GoogleGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,12 @@ public class AuthService {
 
     // Simulated token store to manage active user sessions
     private final Map<String, User> tokenStore = new HashMap<>();
+
+    private final GoogleGateway googleAuthGateway;
+
+    public AuthService(GoogleGateway googleAuthGateway) {
+        this.googleAuthGateway = googleAuthGateway;
+    }
 
     /**
      * Converts a UserDTO object to a User entity.
@@ -49,14 +56,28 @@ public class AuthService {
      * @return true if the user is successfully registered, false otherwise.
      */
     public boolean register(LoginRequestDTO userDTO) {
+        // Convert the DTO into a User entity
         User user = dtoToUser(userDTO);
+
+        // Validate credentials with Google before registering the user
+        boolean isValid = googleAuthGateway.verifyCredentials(user.getEmail(), userDTO.getPassword());
+        if (!isValid) {
+            logger.warn("Invalid credentials on Google for email: {}", user.getEmail());
+            throw new IllegalArgumentException("Invalid credentials on Google. Registration denied.");
+        }
+
+        // Register the user if the credentials are valid and the email is unique
         if (user != null && user.getEmail() != null && !userRepository.containsKey(user.getEmail())) {
             userRepository.put(user.getEmail(), user);
-            logger.info("User registered successfully: {}", user.getEmail());
+            logger.info("User successfully registered: {}", user.getEmail());
             return true;
         }
+
+        logger.warn("User already exists: {}", user.getEmail());
         return false;
     }
+
+
 
     /**
      * Logs in a user by their email and generates a session token.
@@ -64,7 +85,7 @@ public class AuthService {
      * @param email the email of the user attempting to log in.
      * @return a token if the login is successful, null otherwise.
      */
-    public String login(String email) {
+    public String login(String email, String password) {
         User user = userRepository.get(email);
         if (user != null) {
             String token = generateToken();  // Generate a random token for the session

@@ -37,7 +37,6 @@ out/
 
 # Gradle files
 .gradle/
-build/
 
 # Logs
 *.log

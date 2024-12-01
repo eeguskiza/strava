@@ -65,9 +65,9 @@ public class DataInitializer {
                 );
 
                 // Registrar usuarios en el sistema
-                authService.register(user1);
-                authService.register(user2);
-                authService.register(user3);
+                //authService.register(user1);
+                //authService.register(user2);
+                //authService.register(user3);
 
                 logger.info("Users successfully registered in the system!");
 

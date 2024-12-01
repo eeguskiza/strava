@@ -58,7 +58,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody CredentialsDTO credentials) {
-        Optional<String> token = authService.login(credentials.getEmail()).describeConstable();
+        Optional<String> token = authService.login(credentials.getEmail(), credentials.getPassword()).describeConstable();
         if (token.isPresent()) {
             return new ResponseEntity<>(token.get(), HttpStatus.OK);
         } else {
