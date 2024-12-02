@@ -3,17 +3,26 @@ package com.deusto.strava.dto;
 public class CredentialsDTO {
     private String email;
     private String password;
+    private String service; // Nuevo campo para elegir el servicio de autenticación
 
     // Constructor vacío para la deserialización
     public CredentialsDTO() {}
 
-    // Constructor con el campo `email`
+    // Constructor con los campos necesarios
+    public CredentialsDTO(String email, String password, String service) {
+        this.email = email;
+        this.password = password;
+        this.service = service;
+    }
+
     public CredentialsDTO(String email, String password) {
         this.email = email;
         this.password = password;
+        this.service = null; // O puedes definir un valor por defecto si es necesario
     }
 
-    // Getter y Setter
+
+    // Getters y Setters
     public String getEmail() {
         return email;
     }
@@ -28,5 +37,13 @@ public class CredentialsDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 }

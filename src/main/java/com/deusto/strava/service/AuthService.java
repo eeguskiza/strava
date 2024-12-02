@@ -1,8 +1,9 @@
 package com.deusto.strava.service;
 
+import com.deusto.strava.dto.CredentialsDTO;
 import com.deusto.strava.dto.LoginRequestDTO;
 import com.deusto.strava.entity.User;
-import com.deusto.strava.gateway.GoogleGateway;
+import com.deusto.strava.gateway.AuthenticationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,14 @@ public class AuthService {
     // Simulated token store to manage active user sessions
     private final Map<String, User> tokenStore = new HashMap<>();
 
-    private final GoogleGateway googleAuthGateway;
+    // Google or Facebook authentication gateway
+    private final AuthenticationClient authenticationClient;
 
-    public AuthService(GoogleGateway googleAuthGateway) {
-        this.googleAuthGateway = googleAuthGateway;
+
+    public AuthService(AuthenticationClient authenticationClient) {
+        this.authenticationClient = authenticationClient;
     }
+
 
     /**
      * Converts a UserDTO object to a User entity.
@@ -56,17 +60,26 @@ public class AuthService {
      * @return true if the user is successfully registered, false otherwise.
      */
     public boolean register(LoginRequestDTO userDTO) {
-        // Convert the DTO into a User entity
         User user = dtoToUser(userDTO);
 
-        // Validate credentials with Google before registering the user
-        boolean isValid = googleAuthGateway.verifyCredentials(user.getEmail(), userDTO.getPassword());
-        if (!isValid) {
-            logger.warn("Invalid credentials on Google for email: {}", user.getEmail());
-            throw new IllegalArgumentException("Invalid credentials on Google. Registration denied.");
+        // Validar credenciales en función del servicio seleccionado
+        boolean isValid;
+        switch (userDTO.getService().toLowerCase()) {
+            case "google":
+                isValid = authenticationClient.authenticateWithGoogle(user.getEmail(), userDTO.getPassword());
+                break;
+            case "facebook":
+                isValid = authenticationClient.authenticateWithFacebook(user.getEmail(), userDTO.getPassword());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid authentication service selected: " + userDTO.getService());
         }
 
-        // Register the user if the credentials are valid and the email is unique
+        if (!isValid) {
+            logger.warn("Invalid credentials on {} for email: {}", userDTO.getService(), user.getEmail());
+            throw new IllegalArgumentException("Invalid credentials on " + userDTO.getService() + ". Registration denied.");
+        }
+
         if (user != null && user.getEmail() != null && !userRepository.containsKey(user.getEmail())) {
             userRepository.put(user.getEmail(), user);
             logger.info("User successfully registered: {}", user.getEmail());
@@ -79,30 +92,44 @@ public class AuthService {
 
 
 
+
     /**
      * Logs in a user by their email and generates a session token.
      *
      * @param email the email of the user attempting to log in.
      * @return a token if the login is successful, null otherwise.
      */
-    public String login(String email, String password) {
-        // Validar que el email y la contraseña no sean nulos o vacíos
-        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("Email or password cannot be null or empty");
+    public String login(CredentialsDTO credentials) {
+        // Validar que los campos no sean nulos o vacíos
+        if (credentials.getEmail() == null || credentials.getEmail().isEmpty() ||
+                credentials.getPassword() == null || credentials.getPassword().isEmpty() ||
+                credentials.getService() == null || credentials.getService().isEmpty()) {
+            throw new IllegalArgumentException("Email, password, or service cannot be null or empty");
         }
 
-        // Verificar en el servicio de Google si las credenciales son válidas
-        boolean isAuthenticatedWithGoogle = googleAuthGateway.verifyCredentials(email, password);
-        if (!isAuthenticatedWithGoogle) {
-            throw new IllegalArgumentException("Invalid credentials on Google. Login denied.");
+        // Autenticar según el servicio seleccionado
+        boolean isAuthenticated;
+        switch (credentials.getService().toLowerCase()) {
+            case "google":
+                isAuthenticated = authenticationClient.authenticateWithGoogle(credentials.getEmail(), credentials.getPassword());
+                break;
+            case "facebook":
+                isAuthenticated = authenticationClient.authenticateWithFacebook(credentials.getEmail(), credentials.getPassword());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid authentication service selected: " + credentials.getService());
+        }
+
+        if (!isAuthenticated) {
+            throw new IllegalArgumentException("Invalid credentials for " + credentials.getService() + ". Login denied.");
         }
 
         // Buscar el usuario en el repositorio interno
-        User user = userRepository.get(email);
+        User user = userRepository.get(credentials.getEmail());
 
         // Validar si el usuario existe localmente
         if (user == null) {
-            throw new IllegalArgumentException("User not found for email: " + email);
+            throw new IllegalArgumentException("User not found for email: " + credentials.getEmail());
         }
 
         // Generar un token único para la sesión
@@ -110,10 +137,11 @@ public class AuthService {
         tokenStore.put(token, user);
 
         // Registrar el éxito del inicio de sesión
-        logger.info("User logged in successfully: {}", email);
+        logger.info("User logged in successfully with {}: {}", credentials.getService(), credentials.getEmail());
 
         return token;
     }
+
 
 
     /**

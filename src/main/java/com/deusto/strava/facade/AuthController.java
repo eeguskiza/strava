@@ -46,25 +46,30 @@ public class AuthController {
         }
     }
 
-
-    // Login endpoint
+    // Login endpoint with provider selection
     @Operation(
             summary = "Login a user",
-            description = "Allows a user to log in by providing their email. Returns a token if successful.",
+            description = "Allows a user to log in using Google or Facebook by specifying the provider in the request body.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK: Login successful, returns a token"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: User not found"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid credentials or user not found"),
+                    @ApiResponse(responseCode = "400", description = "Bad Request: Missing or invalid data")
             }
     )
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody CredentialsDTO credentials) {
-        Optional<String> token = authService.login(credentials.getEmail(), credentials.getPassword()).describeConstable();
-        if (token.isPresent()) {
-            return new ResponseEntity<>(token.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        try {
+            String token = authService.login(credentials);
+            return ResponseEntity.ok(token);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error during login: " + e.getMessage());
         }
     }
+
+
+
 
     // Logout endpoint
     @Operation(

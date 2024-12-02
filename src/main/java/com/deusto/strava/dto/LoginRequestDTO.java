@@ -14,12 +14,15 @@ public class LoginRequestDTO {
     private int restHeartRate;
     private List<String> trainingSessionIds;
     private List<String> challengeIds;
+    private String service; // Nuevo campo para elegir el servicio de autenticación
 
     // Constructor vacío para la deserialización
     public LoginRequestDTO() {}
 
     // Constructor con todos los campos
-    public LoginRequestDTO(String email, String name, Date birthDate,String password, double weight, double height, int maxHeartRate, int restHeartRate, List<String> trainingSessionIds, List<String> challengeIds) {
+    public LoginRequestDTO(String email, String name, Date birthDate, String password, double weight, double height,
+                           int maxHeartRate, int restHeartRate, List<String> trainingSessionIds,
+                           List<String> challengeIds, String service) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -30,6 +33,7 @@ public class LoginRequestDTO {
         this.restHeartRate = restHeartRate;
         this.trainingSessionIds = trainingSessionIds;
         this.challengeIds = challengeIds;
+        this.service = service;
     }
 
     // Getters y Setters
@@ -111,5 +115,13 @@ public class LoginRequestDTO {
 
     public void setChallengeIds(List<String> challengeIds) {
         this.challengeIds = challengeIds;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 }
