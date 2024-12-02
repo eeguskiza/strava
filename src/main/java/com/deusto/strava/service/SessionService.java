@@ -30,7 +30,7 @@ public class SessionService {
         TrainingSession session = new TrainingSession(
                 sessionDTO.getSport(),
                 sessionDTO.getDistance(),
-                sessionDTO.getStartDate(),
+                (java.sql.Date) sessionDTO.getStartDate(),
                 sessionDTO.getDuration()
         );
 

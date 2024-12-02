@@ -49,11 +49,11 @@ public class ChallengeDTO {
         return targetTime;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public java.sql.Date getStartDate() {
+        return (java.sql.Date) startDate;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public java.sql.Date getEndDate() {
+        return (java.sql.Date) endDate;
     }
 }

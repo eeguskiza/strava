@@ -31,7 +31,7 @@ public class ChallengeService {
         User user = userOptional.get();
 
         Challenge challenge = new Challenge();
-        challenge.setId("challenge_" + (++Challenge.count));
+        challenge.setId(Long.valueOf("challenge_" + (++Challenge.count)));
         challenge.setCreatorName(user.getName());
         challenge.setName(challengeDTO.getName());
         challenge.setSport(challengeDTO.getSport());
