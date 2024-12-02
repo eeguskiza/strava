@@ -12,8 +12,6 @@ public class LoginRequestDTO {
     private double height;
     private int maxHeartRate;
     private int restHeartRate;
-    private List<String> trainingSessionIds;
-    private List<String> challengeIds;
     private String service; // Nuevo campo para elegir el servicio de autenticación
 
     // Constructor vacío para la deserialización
@@ -21,8 +19,7 @@ public class LoginRequestDTO {
 
     // Constructor con todos los campos
     public LoginRequestDTO(String email, String name, Date birthDate, String password, double weight, double height,
-                           int maxHeartRate, int restHeartRate, List<String> trainingSessionIds,
-                           List<String> challengeIds, String service) {
+                           int maxHeartRate, int restHeartRate, String service) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;
@@ -31,8 +28,6 @@ public class LoginRequestDTO {
         this.height = height;
         this.maxHeartRate = maxHeartRate;
         this.restHeartRate = restHeartRate;
-        this.trainingSessionIds = trainingSessionIds;
-        this.challengeIds = challengeIds;
         this.service = service;
     }
 
@@ -99,22 +94,6 @@ public class LoginRequestDTO {
 
     public void setRestHeartRate(int restHeartRate) {
         this.restHeartRate = restHeartRate;
-    }
-
-    public List<String> getTrainingSessionIds() {
-        return trainingSessionIds;
-    }
-
-    public void setTrainingSessionIds(List<String> trainingSessionIds) {
-        this.trainingSessionIds = trainingSessionIds;
-    }
-
-    public List<String> getChallengeIds() {
-        return challengeIds;
-    }
-
-    public void setChallengeIds(List<String> challengeIds) {
-        this.challengeIds = challengeIds;
     }
 
     public String getService() {

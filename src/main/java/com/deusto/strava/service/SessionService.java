@@ -27,7 +27,6 @@ public class SessionService {
 	}
 
     public String createSession(String token, TrainingSessionDTO sessionDTO) {
-
         User user = authService.getUserByToken(token);
         if (user==null) {
             throw new IllegalArgumentException("Invalid or expired token");

@@ -10,6 +10,8 @@ public class TrainingSessionDTO {
     private float duration;
 
     // Constructor
+	public TrainingSessionDTO() {
+	}
     public TrainingSessionDTO(String id, String sport, float distance, Date startDate, float duration) {
         this.id = id;
         this.sport = sport;
