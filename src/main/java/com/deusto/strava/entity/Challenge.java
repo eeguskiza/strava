@@ -12,7 +12,8 @@ public class Challenge {
     private Long id;
 
     @Column(nullable = false)
-    private String creatorEmail;
+    private String creatorEmail = "default_value";
+
 
     @Column(nullable = false)
     private String name;
