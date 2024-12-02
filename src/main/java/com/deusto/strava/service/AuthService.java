@@ -1,33 +1,35 @@
 package com.deusto.strava.service;
 
-import com.deusto.strava.dto.CredentialsDTO;
-import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.entity.User;
-import com.deusto.strava.gateway.AuthenticationClient;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.deusto.strava.dto.CredentialsDTO;
+import com.deusto.strava.dto.LoginRequestDTO;
+import com.deusto.strava.entity.Token;
+import com.deusto.strava.entity.User;
+import com.deusto.strava.repository.TokenRepository;
+import com.deusto.strava.repository.UserRepository;
+
+import factory.FactoryUser;
+import serviceGateway.ServiceGateway;
 
 @Service
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    // Simulated user repository to store registered users
-    private final Map<String, User> userRepository = new HashMap<>();
-
-    // Simulated token store to manage active user sessions
-    private final Map<String, User> tokenStore = new HashMap<>();
+ 
 
     // Google or Facebook authentication gateway
-    private final AuthenticationClient authenticationClient;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
-
-    public AuthService(AuthenticationClient authenticationClient) {
-        this.authenticationClient = authenticationClient;
+    public AuthService(UserRepository userRepository, TokenRepository tokenRepository) {
+    	this.userRepository = userRepository;
+    	this.tokenRepository = tokenRepository;
     }
 
 
@@ -63,29 +65,24 @@ public class AuthService {
         User user = dtoToUser(userDTO);
 
         // Validar credenciales en función del servicio seleccionado
-        boolean isValid;
-        switch (userDTO.getService().toLowerCase()) {
-            case "google":
-                isValid = authenticationClient.authenticateWithGoogle(user.getEmail(), userDTO.getPassword());
-                break;
-            case "facebook":
-                isValid = authenticationClient.authenticateWithFacebook(user.getEmail(), userDTO.getPassword());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid authentication service selected: " + userDTO.getService());
-        }
-
-        if (!isValid) {
-            logger.warn("Invalid credentials on {} for email: {}", userDTO.getService(), user.getEmail());
+        ServiceGateway serviceGateway = FactoryUser.selectService(userDTO.getService());
+		if (serviceGateway == null) {
+			throw new IllegalArgumentException("Invalid authentication service selected: " + userDTO.getService());
+		}
+		boolean isValid = false; 
+		if(user != null && user.getEmail() != null) {
+			isValid = serviceGateway.authenticate(userDTO.getEmail(), userDTO.getPassword());
+		}
+        if (isValid) {
+        	if (getUserByEmail(userDTO.getEmail())==null){
+                addUser(user);
+                logger.info("User registered successfully with {}: {}", userDTO.getService(), userDTO.getEmail());
+                return true;
+        	}
+        }else {
+        	logger.warn("Invalid credentials on {} for email: {}", userDTO.getService(), user.getEmail());
             throw new IllegalArgumentException("Invalid credentials on " + userDTO.getService() + ". Registration denied.");
         }
-
-        if (user != null && user.getEmail() != null && !userRepository.containsKey(user.getEmail())) {
-            userRepository.put(user.getEmail(), user);
-            logger.info("User successfully registered: {}", user.getEmail());
-            return true;
-        }
-
         logger.warn("User already exists: {}", user.getEmail());
         return false;
     }
@@ -107,25 +104,18 @@ public class AuthService {
             throw new IllegalArgumentException("Email, password, or service cannot be null or empty");
         }
 
-        // Autenticar según el servicio seleccionado
-        boolean isAuthenticated;
-        switch (credentials.getService().toLowerCase()) {
-            case "google":
-                isAuthenticated = authenticationClient.authenticateWithGoogle(credentials.getEmail(), credentials.getPassword());
-                break;
-            case "facebook":
-                isAuthenticated = authenticationClient.authenticateWithFacebook(credentials.getEmail(), credentials.getPassword());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid authentication service selected: " + credentials.getService());
-        }
+        ServiceGateway serviceGateway = FactoryUser.selectService(credentials.getService());
+		if (serviceGateway == null) {
+			throw new IllegalArgumentException("Invalid authentication service selected: " + credentials.getService());
+		}
+		boolean isValid = serviceGateway.authenticate(credentials.getEmail(), credentials.getPassword());
 
-        if (!isAuthenticated) {
+        if (!isValid) {
             throw new IllegalArgumentException("Invalid credentials for " + credentials.getService() + ". Login denied.");
         }
 
         // Buscar el usuario en el repositorio interno
-        User user = userRepository.get(credentials.getEmail());
+        User user = getUserByEmail(credentials.getEmail());
 
         // Validar si el usuario existe localmente
         if (user == null) {
@@ -134,7 +124,7 @@ public class AuthService {
 
         // Generar un token único para la sesión
         String token = generateToken();
-        tokenStore.put(token, user);
+        tokenRepository.save(new Token(token, user));
 
         // Registrar el éxito del inicio de sesión
         logger.info("User logged in successfully with {}: {}", credentials.getService(), credentials.getEmail());
@@ -151,10 +141,11 @@ public class AuthService {
      * @return true if the logout is successful, false otherwise.
      */
     public boolean logout(String token) {
-        if (tokenStore.containsKey(token)) {
-            tokenStore.remove(token);
-            return true;
-        }
+		if (token != null && tokenRepository.findByToken(token).isPresent()) {
+			tokenRepository.deleteByToken(token);
+			return true;
+		}
+        
         return false;
     }
 
@@ -165,7 +156,7 @@ public class AuthService {
      */
     public void addUser(User user) {
         if (user != null) {
-            userRepository.putIfAbsent(user.getEmail(), user);
+            userRepository.save(user);
         }
     }
 
@@ -176,7 +167,11 @@ public class AuthService {
      * @return the User entity associated with the token.
      */
     public User getUserByToken(String token) {
-        return tokenStore.get(token);
+    	Optional<Token>t = tokenRepository.findByToken(token);
+		if (t.isPresent()) {
+			return t.get().getUser();
+		}
+		return null;
     }
 
     /**
@@ -186,7 +181,11 @@ public class AuthService {
      * @return the User entity associated with the email.
      */
     public User getUserByEmail(String email) {
-        return userRepository.get(email);
+    	Optional<User> user = userRepository.findByEmail(email);
+    	if (user.isPresent()) {
+    		return user.get();
+    	}
+    	return null;	
     }
 
     /**

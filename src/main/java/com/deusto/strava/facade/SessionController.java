@@ -17,6 +17,9 @@ public class SessionController {
     @Autowired
     private SessionService sessionService;
 
+	public SessionController(SessionService sessionService) {
+        this.sessionService = sessionService;
+	}
     /**
      * Endpoint to create a new training session for an authenticated user.
      * @param token The token passed in the request header for user authentication.

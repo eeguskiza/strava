@@ -3,6 +3,8 @@ package com.deusto.strava.service;
 import com.deusto.strava.entity.Challenge;
 import com.deusto.strava.entity.TrainingSession;
 import com.deusto.strava.entity.User;
+import com.deusto.strava.repository.ChallengeRepository;
+import com.deusto.strava.repository.UserRepository;
 import com.deusto.strava.dto.ChallengeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,13 @@ public class ChallengeService {
 
     @Autowired
     private AuthService authService; // To validate user tokens
-
-    private List<Challenge> allChallenges = new ArrayList<>(); // Central list of all challenges
+    private final ChallengeRepository challengeRepository; // To access challenge data
+    private final UserRepository userRepository; // To access user data
+    
+	public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository) {
+		this.challengeRepository = challengeRepository;
+		this.userRepository = userRepository;
+	}
 
     // Create a challenge and add it to the global list
     public String createChallenge(String token, ChallengeDTO challengeDTO) {
@@ -32,7 +39,7 @@ public class ChallengeService {
 
         Challenge challenge = new Challenge();
         challenge.setId(Long.valueOf("challenge_" + (++Challenge.count)));
-        challenge.setCreatorName(user.getName());
+        challenge.setCreatorEmail(user.getEmail());
         challenge.setName(challengeDTO.getName());
         challenge.setSport(challengeDTO.getSport());
         challenge.setTargetDistance(challengeDTO.getTargetDistance());
@@ -44,7 +51,7 @@ public class ChallengeService {
         user.getChallenges().add(challenge);
 
         // Add the challenge to the global list
-        allChallenges.add(challenge);
+        userRepository.save(user);
 
         return "Challenge created successfully with ID: " + challenge.getId();
     }
@@ -52,13 +59,12 @@ public class ChallengeService {
     // Retrieve all active challenges
     public List<Challenge> getAllActiveChallenges() {
         Date currentDate = new Date();
-        return allChallenges.stream()
-                .filter(challenge -> challenge.getEndDate().after(currentDate))
-                .collect(Collectors.toList());
+        List<Challenge>challenges = challengeRepository.findByEndDateGreaterThanEqual(currentDate);
+        return challenges;
     }
 
     // Method to accept a challenge
-    public String acceptChallenge(String token, String challengeId) {
+    public String acceptChallenge(String token, Long challengeId) {
         // Validate token and get the user
         Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
         if (userOptional.isEmpty()) {
@@ -68,11 +74,9 @@ public class ChallengeService {
         User user = userOptional.get();
 
         // Find the challenge by ID in the global list
-        Optional<Challenge> challengeOptional = allChallenges.stream()
-                .filter(challenge -> challenge.getId().equals(challengeId))
-                .findFirst();
+        Optional<Challenge> challengeOptional = challengeRepository.findById(challengeId);
 
-        if (challengeOptional.isEmpty()) {
+        if (!challengeOptional.isPresent()) {
             throw new IllegalArgumentException("Challenge not found: " + challengeId);
         }
 
@@ -85,6 +89,7 @@ public class ChallengeService {
 
         // Add the challenge to the user's list
         user.getChallenges().add(challenge);
+        userRepository.save(user);
 
         return "Challenge accepted successfully: " + challenge.getName();
     }
@@ -92,18 +97,16 @@ public class ChallengeService {
     // Method to retrieve challenges accepted by the authenticated user
     public List<Challenge> getMyChallenges(String token) {
         // Validate token and get the user
-        Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
-        if (userOptional.isEmpty()) {
+        User user = authService.getUserByToken(token);
+        if (user == null) {
             throw new IllegalArgumentException("Invalid or expired token");
         }
-
-        User user = userOptional.get();
 
         // Return the list of challenges accepted by the user
         return user.getChallenges();
     }
 
-    public String getChallengeProgress(String token, String challengeId) {
+    public String getChallengeProgress(String token, Long challengeId) {
         // Obtener el usuario asociado al token
         User user = authService.getUserByToken(token);
         if (user == null) {

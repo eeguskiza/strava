@@ -12,7 +12,7 @@ public class Challenge {
     private Long id;
 
     @Column(nullable = false)
-    private String creatorName;
+    private String creatorEmail;
 
     @Column(nullable = false)
     private String name;
@@ -37,8 +37,8 @@ public class Challenge {
     }
 
     // Constructor personalizado
-    public Challenge(String creatorName, String name, String sport, float targetDistance, float targetTime, Date startDate, Date endDate) {
-        this.creatorName = creatorName;
+    public Challenge(String creatorEmail, String name, String sport, float targetDistance, float targetTime, Date startDate, Date endDate) {
+        this.creatorEmail = creatorEmail;
         this.name = name;
         this.sport = sport;
         this.targetDistance = targetDistance;
@@ -56,12 +56,12 @@ public class Challenge {
         this.id = id;
     }
 
-    public String getCreatorName() {
-        return creatorName;
+    public String getCreatorEmail() {
+        return creatorEmail;
     }
 
-    public void setCreatorName(String creatorName) {
-        this.creatorName = creatorName;
+    public void setCreatorEmail(String creatorEmail) {
+        this.creatorEmail = creatorEmail;
     }
 
     public String getName() {

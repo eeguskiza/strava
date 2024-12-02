@@ -16,6 +16,9 @@ public class ChallengeController {
     @Autowired
     private ChallengeService challengeService;
 
+	public ChallengeController(ChallengeService challengeService) {
+        this.challengeService = challengeService;
+	}
     /**
      * Endpoint to create a new challenge.
      * @param token The token passed in the request header for user authentication.
@@ -59,7 +62,7 @@ public class ChallengeController {
     @PostMapping("/enrollment")
     public ResponseEntity<String> acceptChallenge(
             @RequestHeader("token") String token, // Token provided in the request header
-            @RequestParam("challengeId") String challengeId) { // Challenge ID provided as a request parameter
+            @RequestParam("challengeId") Long challengeId) { // Challenge ID provided as a request parameter
         try {
             String response = challengeService.acceptChallenge(token, challengeId);
             return ResponseEntity.ok(response); // Successful response
@@ -90,7 +93,7 @@ public class ChallengeController {
     @GetMapping("/progress")
     public ResponseEntity<String> getChallengeProgress(
             @RequestHeader("token") String token, // Token del usuario en los headers
-            @RequestParam("challengeId") String challengeId // ID del desafío en el query parameter
+            @RequestParam("challengeId") Long challengeId // ID del desafío en el query parameter
     ) {
         try {
             String progress = challengeService.getChallengeProgress(token, challengeId);

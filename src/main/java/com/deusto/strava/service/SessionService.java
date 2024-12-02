@@ -2,6 +2,8 @@ package com.deusto.strava.service;
 
 import com.deusto.strava.entity.TrainingSession;
 import com.deusto.strava.entity.User;
+import com.deusto.strava.repository.TrainingSessionRepository;
+import com.deusto.strava.repository.UserRepository;
 import com.deusto.strava.dto.TrainingSessionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,15 +18,20 @@ public class SessionService {
 
     @Autowired
     private AuthService authService;
+    private final UserRepository userRepository;
+    private final TrainingSessionRepository trainingSessionRepository;
+
+	public SessionService(UserRepository userRepository, TrainingSessionRepository trainingSessionRepository) {
+		this.userRepository = userRepository;
+		this.trainingSessionRepository = trainingSessionRepository;
+	}
 
     public String createSession(String token, TrainingSessionDTO sessionDTO) {
 
-        Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
-        if (userOptional.isEmpty()) {
+        User user = authService.getUserByToken(token);
+        if (user==null) {
             throw new IllegalArgumentException("Invalid or expired token");
         }
-
-        User user = userOptional.get();
 
 
         TrainingSession session = new TrainingSession(
@@ -35,17 +42,16 @@ public class SessionService {
         );
 
         user.getTrainingSessions().add(session);
+        userRepository.save(user);
 
         return "Training session created successfully with ID: " + session.getId();
     }
 
     public List<TrainingSession> getSessions(String token, Date startDate, Date endDate) {
-        Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
-        if (userOptional.isEmpty()) {
+        User user = authService.getUserByToken(token);
+        if (user==null) {
             throw new IllegalArgumentException("Invalid or expired token");
         }
-
-        User user = userOptional.get();
 
         if (startDate != null && endDate != null) {
             return user.getTrainingSessions().stream()
