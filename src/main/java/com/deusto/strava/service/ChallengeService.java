@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,35 +30,56 @@ public class ChallengeService {
 
     // Create a challenge and add it to the global list
     public String createChallenge(String token, ChallengeDTO challengeDTO) {
-        Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("Invalid or expired token");
+        try {
+            // Log the incoming data
+            System.out.println("Received token: " + token);
+            System.out.println("Received ChallengeDTO: " + challengeDTO);
+
+            // Verify the user
+            Optional<User> userOptional = Optional.ofNullable(authService.getUserByToken(token));
+            if (userOptional.isEmpty()) {
+                System.out.println("Token invalid or expired.");
+                throw new IllegalArgumentException("Invalid or expired token");
+            }
+
+            User user = userOptional.get();
+            System.out.println("User found: " + user);
+
+            // Map DTO to Entity
+            Challenge challenge = new Challenge();
+            challenge.setCreatorEmail(user.getEmail());
+            challenge.setName(challengeDTO.getName());
+            challenge.setSport(challengeDTO.getSport());
+            challenge.setTargetDistance(challengeDTO.getTargetDistance());
+            challenge.setTargetTime(challengeDTO.getTargetTime());
+            challenge.setStartDate(challengeDTO.getStartDate());
+            challenge.setEndDate(challengeDTO.getEndDate());
+            System.out.println("Challenge entity created: " + challenge);
+
+            // Save challenge to database and get ID
+            Challenge savedChallenge = challengeRepository.save(challenge);
+            System.out.println("Challenge saved to database with ID: " + savedChallenge.getId());
+
+            // Add the saved challenge to the user's list
+            user.getChallenges().add(savedChallenge);
+            userRepository.save(user);
+            System.out.println("User with updated challenges saved to database.");
+
+            return "Challenge created successfully with ID: " + savedChallenge.getId();
+        } catch (Exception e) {
+            // Log any exception that occurs
+            System.err.println("Error creating challenge: " + e.getMessage());
+            e.printStackTrace();
+            return "Error: " + e.getMessage();
         }
-
-        User user = userOptional.get();
-
-        Challenge challenge = new Challenge();
-        challenge.setId(Long.valueOf("challenge_" + (++Challenge.count)));
-        challenge.setCreatorEmail(user.getEmail());
-        challenge.setName(challengeDTO.getName());
-        challenge.setSport(challengeDTO.getSport());
-        challenge.setTargetDistance(challengeDTO.getTargetDistance());
-        challenge.setTargetTime(challengeDTO.getTargetTime());
-        challenge.setStartDate(challengeDTO.getStartDate());
-        challenge.setEndDate(challengeDTO.getEndDate());
-
-        // Add the challenge to the user's list
-        user.getChallenges().add(challenge);
-
-        // Add the challenge to the global list
-        userRepository.save(user);
-
-        return "Challenge created successfully with ID: " + challenge.getId();
     }
+
+
 
     // Retrieve all active challenges
     public List<Challenge> getAllActiveChallenges() {
-        Date currentDate = new Date();
+        // Get the current date
+        Date currentDate = new Date(System.currentTimeMillis());
         List<Challenge>challenges = challengeRepository.findByEndDateGreaterThanEqual(currentDate);
         return challenges;
     }

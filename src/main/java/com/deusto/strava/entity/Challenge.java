@@ -4,21 +4,20 @@ import jakarta.persistence.*;
 import java.sql.Date;
 
 @Entity
+@Table(name = "challenges")
 public class Challenge {
 
-    public static int count;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String creatorEmail = "default_value";
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String creatorEmail;
 
-
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String sport;
 
     @Column(nullable = false)

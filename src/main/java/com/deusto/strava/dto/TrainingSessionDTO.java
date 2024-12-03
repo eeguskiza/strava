@@ -1,9 +1,9 @@
 package com.deusto.strava.dto;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class TrainingSessionDTO {
-    private String id;
+    private Long id;
     private String sport;
     private float distance;
     private Date startDate;
@@ -12,7 +12,7 @@ public class TrainingSessionDTO {
     // Constructor
 	public TrainingSessionDTO() {
 	}
-    public TrainingSessionDTO(String id, String sport, float distance, Date startDate, float duration) {
+    public TrainingSessionDTO(Long id, String sport, float distance, Date startDate, float duration) {
         this.id = id;
         this.sport = sport;
         this.distance = distance;
@@ -21,7 +21,7 @@ public class TrainingSessionDTO {
     }
 
     // Getters y Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

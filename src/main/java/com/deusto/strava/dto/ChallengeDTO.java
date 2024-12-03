@@ -1,9 +1,9 @@
 package com.deusto.strava.dto;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class ChallengeDTO {
-    private String id;
+    private Long id;
     private String creatorName;
     private String name;
     private String sport;
@@ -13,7 +13,7 @@ public class ChallengeDTO {
     private Date endDate;
 
     // Constructor
-    public ChallengeDTO(String id, String creatorName, String name, String sport, float targetDistance, float targetTime, Date startDate, Date endDate) {
+    public ChallengeDTO(Long id, String creatorName, String name, String sport, float targetDistance, float targetTime, Date startDate, Date endDate) {
         this.id = id;
         this.creatorName = creatorName;
         this.name = name;
@@ -25,7 +25,7 @@ public class ChallengeDTO {
     }
 
     // Getters y Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

@@ -5,16 +5,13 @@ import serviceGateway.GoogleGateway;
 import serviceGateway.ServiceGateway;
 
 public class FactoryUser {
-	public static ServiceGateway selectService(String what) {
-        if (what.equals("Google")) {
-        	return new GoogleGateway();
-        }
-        else if (what.equals("Facebook")) {
+    public static ServiceGateway selectService(String what) {
+        if (what.equalsIgnoreCase("Google")) {
+            return new GoogleGateway();
+        } else if (what.equalsIgnoreCase("Facebook")) {
             return new FacebookGateway();
-        }
-        else {
-        	return null;
+        } else {
+            return null;
         }
     }
-
 }
