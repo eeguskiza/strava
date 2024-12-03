@@ -11,5 +11,5 @@ import com.deusto.strava.entity.Token;
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
 	Optional<Token> findByToken(String token);
-	void deleteByToken(String token);
+	Optional<Token> deleteByToken(String token);
 }
