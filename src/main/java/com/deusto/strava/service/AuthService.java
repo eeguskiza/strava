@@ -141,13 +141,24 @@ public class AuthService {
      * @return true if the logout is successful, false otherwise.
      */
     public boolean logout(String token) {
-		if (token != null && tokenRepository.findByToken(token).isPresent()) {
-			tokenRepository.deleteByToken(token);
-			return true;
-		}
-        
+        if (token == null) {
+            logger.warn("Logout failed: token is null");
+            return false;
+        }
+
+        Optional<Token> tokenOptional = tokenRepository.findByToken(token);
+        if (tokenOptional.isPresent()) {
+            logger.info("Token found: " + token);
+            tokenRepository.deleteByToken(token);
+            logger.info("Token deleted successfully: " + token);
+            return true;
+        } else {
+            logger.warn("Invalid token or already logged out: " + token);
+        }
+
         return false;
     }
+
 
     /**
      * Adds a user to the repository if they do not already exist.
