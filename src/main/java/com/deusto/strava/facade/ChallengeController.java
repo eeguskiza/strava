@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -47,7 +48,11 @@ public class ChallengeController {
     public ResponseEntity<?> getAllActiveChallenges() {
         try {
             List<Challenge> activeChallenges = challengeService.getAllActiveChallenges();
-            return ResponseEntity.ok(activeChallenges); // Successful response
+            List<ChallengeDTO>activeChallengesDTO = new ArrayList<>();
+			for (Challenge challenge : activeChallenges) {
+				activeChallengesDTO.add(challengeToDTO(challenge));
+			}
+            return ResponseEntity.ok(activeChallengesDTO); // Successful response
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: An unexpected error occurred."); // General error
         }
@@ -82,7 +87,11 @@ public class ChallengeController {
     public ResponseEntity<?> getMyChallenges(@RequestHeader("token") String token) {
         try {
             List<Challenge> myChallenges = challengeService.getMyChallenges(token);
-            return ResponseEntity.ok(myChallenges); // Successful response
+            List<ChallengeDTO>myChallengesDTO = new ArrayList<>();
+			for (Challenge challenge : myChallenges) {
+				myChallengesDTO.add(challengeToDTO(challenge));
+			}
+            return ResponseEntity.ok(myChallengesDTO); // Successful response
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401).body("Error: " + e.getMessage()); // Invalid or expired token
         } catch (Exception e) {
@@ -104,6 +113,10 @@ public class ChallengeController {
             return ResponseEntity.status(500).body("Error: An unexpected error occurred."); // Error general
         }
     }
+
+	public ChallengeDTO challengeToDTO(Challenge challenge) {
+		return new ChallengeDTO(challenge.getId(), challenge.getCreatorEmail(), challenge.getName(), challenge.getSport(), challenge.getTargetDistance(), challenge.getTargetTime(), challenge.getStartDate(), challenge.getEndDate());
+	}
 
 
 

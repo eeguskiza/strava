@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,12 +50,20 @@ public class SessionController {
      * @return A response entity containing a list of training sessions.
      */
     @GetMapping
-    public ResponseEntity<List<TrainingSession>> getSessions(
+    public ResponseEntity<List<TrainingSessionDTO>> getSessions(
             @RequestHeader("token") String token, // Token provided in the request header
             @RequestParam(required = false) Date startDate, // Optional start date for filtering
             @RequestParam(required = false) Date endDate // Optional end date for filtering
     ) {
         List<TrainingSession> sessions = sessionService.getSessions(token, startDate, endDate);
-        return ResponseEntity.ok(sessions); // Successful response with the list of sessions
+        List<TrainingSessionDTO>sessionsDTO = new ArrayList<>();
+        for(TrainingSession session : sessions){
+            sessionsDTO.add(sesssionToDTO(session));
+        }
+        return ResponseEntity.ok(sessionsDTO); // Successful response with the list of sessions
+    }
+
+	public TrainingSessionDTO sesssionToDTO(TrainingSession session){
+        return new TrainingSessionDTO(session.getId(), session.getSport(), session.getDistance(), session.getStartDate(), session.getDuration());
     }
 }
