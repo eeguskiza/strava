@@ -3,29 +3,27 @@ package com.deusto.strava.service;
 import com.deusto.strava.entity.Challenge;
 import com.deusto.strava.entity.TrainingSession;
 import com.deusto.strava.entity.User;
-import com.deusto.strava.repository.ChallengeRepository;
-import com.deusto.strava.repository.UserRepository;
+import com.deusto.strava.repository.IChallengeRepository;
+import com.deusto.strava.repository.IUserRepository;
 import com.deusto.strava.dto.ChallengeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ChallengeService {
 
     @Autowired
     private AuthService authService; // To validate user tokens
-    private final ChallengeRepository challengeRepository; // To access challenge data
-    private final UserRepository userRepository; // To access user data
+    private final IChallengeRepository IChallengeRepository; // To access challenge data
+    private final IUserRepository IUserRepository; // To access user data
     
-	public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository) {
-		this.challengeRepository = challengeRepository;
-		this.userRepository = userRepository;
+	public ChallengeService(IChallengeRepository IChallengeRepository, IUserRepository IUserRepository) {
+		this.IChallengeRepository = IChallengeRepository;
+		this.IUserRepository = IUserRepository;
 	}
 
     // Create a challenge and add it to the global list
@@ -57,12 +55,12 @@ public class ChallengeService {
             System.out.println("Challenge entity created: " + challenge);
 
             // Save challenge to database and get ID
-            Challenge savedChallenge = challengeRepository.save(challenge);
+            Challenge savedChallenge = IChallengeRepository.save(challenge);
             System.out.println("Challenge saved to database with ID: " + savedChallenge.getId());
 
             // Add the saved challenge to the user's list
             user.getChallenges().add(savedChallenge);
-            userRepository.save(user);
+            IUserRepository.save(user);
             System.out.println("User with updated challenges saved to database.");
 
             return "Challenge created successfully with ID: " + savedChallenge.getId();
@@ -80,7 +78,7 @@ public class ChallengeService {
     public List<Challenge> getAllActiveChallenges() {
         // Get the current date
         Date currentDate = new Date(System.currentTimeMillis());
-        List<Challenge>challenges = challengeRepository.findByEndDateGreaterThanEqual(currentDate);
+        List<Challenge>challenges = IChallengeRepository.findByEndDateGreaterThanEqual(currentDate);
         return challenges;
     }
 
@@ -95,7 +93,7 @@ public class ChallengeService {
         User user = userOptional.get();
 
         // Find the challenge by ID in the global list
-        Optional<Challenge> challengeOptional = challengeRepository.findById(challengeId);
+        Optional<Challenge> challengeOptional = IChallengeRepository.findById(challengeId);
 
         if (!challengeOptional.isPresent()) {
             throw new IllegalArgumentException("Challenge not found: " + challengeId);
@@ -110,7 +108,7 @@ public class ChallengeService {
 
         // Add the challenge to the user's list
         user.getChallenges().add(challenge);
-        userRepository.save(user);
+        IUserRepository.save(user);
 
         return "Challenge accepted successfully: " + challenge.getName();
     }

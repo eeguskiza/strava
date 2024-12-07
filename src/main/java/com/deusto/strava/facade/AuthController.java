@@ -1,9 +1,7 @@
 package com.deusto.strava.facade;
 
 import com.deusto.strava.dto.CredentialsDTO;
-import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.entity.User;
+import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,8 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,7 +32,7 @@ public class AuthController {
     )
 
     @PostMapping("/user")
-    public ResponseEntity<String> register(@RequestBody LoginRequestDTO userDTO) {
+    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
         if (authService.register(userDTO)) {
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
             //return ResponseEntity.status(HttpStatus.CREATED).build();

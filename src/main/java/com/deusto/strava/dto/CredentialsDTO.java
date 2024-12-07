@@ -15,11 +15,6 @@ public class CredentialsDTO {
         this.service = service;
     }
 
-    public CredentialsDTO(String email, String password) {
-        this.email = email;
-        this.password = password;
-        this.service = null; // O puedes definir un valor por defecto si es necesario
-    }
 
 
     // Getters y Setters

@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class FacebookGateway implements ServiceGateway{
+public class FacebookGatewayI implements IServiceGateway {
 	
     private static final String FACEBOOK_SERVER_HOST = "localhost";
     private static final int FACEBOOK_SERVER_PORT = 9091;

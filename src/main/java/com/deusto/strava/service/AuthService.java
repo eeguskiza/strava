@@ -1,5 +1,6 @@
 package com.deusto.strava.service;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -7,39 +8,42 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.deusto.strava.dto.CredentialsDTO;
-import com.deusto.strava.dto.LoginRequestDTO;
-import com.deusto.strava.entity.Token;
+import com.deusto.strava.dto.UserDTO;
 import com.deusto.strava.entity.User;
-import com.deusto.strava.repository.TokenRepository;
-import com.deusto.strava.repository.UserRepository;
+import com.deusto.strava.repository.IUserRepository;
 
 import factory.FactoryUser;
-import serviceGateway.ServiceGateway;
 
 @Service
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
- 
+    // User repository interface
+    private final IUserRepository userRepository;
 
-    // Google or Facebook authentication gateway
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-
-    public AuthService(UserRepository userRepository, TokenRepository tokenRepository) {
-    	this.userRepository = userRepository;
-    	this.tokenRepository = tokenRepository;
-    }
-
+    // In-memory token storage
+    // Instead of saving tokens to a database, we store them in a HashMap.
+    // Key: Token (String), Value: User (User)
+    private HashMap<String, User> tokenRepository = new HashMap<>();
 
     /**
-     * Converts a UserDTO object to a User entity.
+     * Constructor that receives an IUserRepository implementation.
+     *
+     * @param userRepository the repository for user entities.
+     */
+    public AuthService(IUserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    /**
+     * Converts a LoginRequestDTO object to a User entity.
      *
      * @param userDTO the DTO containing user data.
      * @return the User entity created from the DTO.
+     * @throws IllegalArgumentException if the birth date is null.
      */
-    private User dtoToUser(LoginRequestDTO userDTO) {
+    private User dtoToUser(UserDTO userDTO) {
         User user = new User();
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
@@ -50,105 +54,95 @@ public class AuthService {
         } else {
             throw new IllegalArgumentException("Birthdate cannot be null");
         }
-
         return user;
     }
 
-
     /**
-     * Registers a new user if the email is unique.
+     * Registers a new user if the email is unique and the credentials are valid.
      *
      * @param userDTO the DTO containing the user's registration data.
      * @return true if the user is successfully registered, false otherwise.
+     * @throws IllegalArgumentException if the credentials are invalid.
      */
-    public boolean register(LoginRequestDTO userDTO) {
+    public boolean register(UserDTO userDTO) {
         User user = dtoToUser(userDTO);
 
-        // Validar credenciales en función del servicio seleccionado
-        boolean isValid = FactoryUser.selectService(userDTO.getService()).authenticate(userDTO.getEmail(), userDTO.getPassword());
+        // Validate credentials based on the selected service
+        boolean isValid = FactoryUser.createService(userDTO.getService())
+                .authenticate(userDTO.getEmail(), userDTO.getPassword());
 
         if (isValid) {
-        	if (getUserByEmail(userDTO.getEmail())==null){
+            // Check if the user does not already exist
+            if (getUserByEmail(userDTO.getEmail()) == null) {
                 addUser(user);
                 logger.info("User registered successfully with {}: {}", userDTO.getService(), userDTO.getEmail());
                 return true;
-        	}
-        }else {
-        	logger.warn("Invalid credentials on {} for email: {}", userDTO.getService(), user.getEmail());
+            }
+        } else {
+            logger.warn("Invalid credentials on {} for email: {}", userDTO.getService(), user.getEmail());
             throw new IllegalArgumentException("Invalid credentials on " + userDTO.getService() + ". Registration denied.");
         }
+
         logger.warn("User already exists: {}", user.getEmail());
         return false;
     }
 
-
-
-
     /**
      * Logs in a user by their email and generates a session token.
      *
-     * @param email the email of the user attempting to log in.
-     * @return a token if the login is successful, null otherwise.
+     * @param credentials the DTO containing the user's login credentials.
+     * @return a token if the login is successful, otherwise throws an exception.
+     * @throws IllegalArgumentException if credentials are invalid or the user is not found.
      */
     public String login(CredentialsDTO credentials) {
-        // Validar que los campos no sean nulos o vacíos
+        // Validate that none of the required fields are null or empty
         if (credentials.getEmail() == null || credentials.getEmail().isEmpty() ||
                 credentials.getPassword() == null || credentials.getPassword().isEmpty() ||
                 credentials.getService() == null || credentials.getService().isEmpty()) {
             throw new IllegalArgumentException("Email, password, or service cannot be null or empty");
         }
 
-        boolean isValid = FactoryUser.selectService(credentials.getService()).authenticate(credentials.getEmail(), credentials.getPassword());
+        // Validate the credentials through the selected external service (e.g., Google, Facebook)
+        boolean isValid = FactoryUser.createService(credentials.getService())
+                .authenticate(credentials.getEmail(), credentials.getPassword());
 
         if (!isValid) {
             throw new IllegalArgumentException("Invalid credentials for " + credentials.getService() + ". Login denied.");
         }
 
-        // Buscar el usuario en el repositorio interno
+        // Look up the user in the local repository
         User user = getUserByEmail(credentials.getEmail());
 
-        // Validar si el usuario existe localmente
+        // Check if the user exists locally
         if (user == null) {
             throw new IllegalArgumentException("User not found for email: " + credentials.getEmail());
         }
 
-        // Generar un token único para la sesión
+        // Generate a unique token for the session
         String token = generateToken();
-        tokenRepository.save(new Token(token, user));
+        tokenRepository.put(token, user);
 
-        // Registrar el éxito del inicio de sesión
+        // Log the successful login
         logger.info("User logged in successfully with {}: {}", credentials.getService(), credentials.getEmail());
 
         return token;
     }
 
-
-
     /**
-     * Logs out a user by removing their token from the store.
+     * Logs out a user by removing their token from the in-memory repository.
      *
      * @param token the session token of the user.
-     * @return true if the logout is successful, false otherwise.
+     * @return true if logout is successful, false otherwise.
      */
     public boolean logout(String token) {
-        if (token == null) {
-            logger.warn("Logout failed: token is null");
-            return false;
-        }
-
-        Optional<Token> tokenOptional = tokenRepository.findByToken(token);
-        if (tokenOptional.isPresent()) {
-            logger.info("Token found: " + token);
-            tokenRepository.deleteByToken(token);
-            logger.info("Token deleted successfully: " + token);
+        if (tokenRepository.containsKey(token)) {
+            tokenRepository.remove(token);
+            logger.info("User logged out successfully with token: {}", token);
             return true;
-        } else {
-            logger.warn("Invalid token or already logged out: " + token);
         }
-
+        logger.warn("User not found for token: {}", token);
         return false;
     }
-
 
     /**
      * Adds a user to the repository if they do not already exist.
@@ -165,32 +159,26 @@ public class AuthService {
      * Retrieves a user based on their session token.
      *
      * @param token the session token of the user.
-     * @return the User entity associated with the token.
+     * @return the User entity associated with the token or null if not found.
      */
     public User getUserByToken(String token) {
-    	Optional<Token>t = tokenRepository.findByToken(token);
-		if (t.isPresent()) {
-			return t.get().getUser();
-		}
-		return null;
+        return tokenRepository.get(token);
     }
 
     /**
      * Retrieves a user based on their email address.
      *
      * @param email the email address of the user.
-     * @return the User entity associated with the email.
+     * @return the User entity associated with the email, or null if not found.
      */
     public User getUserByEmail(String email) {
-    	Optional<User> user = userRepository.findByEmail(email);
-    	if (user.isPresent()) {
-    		return user.get();
-    	}
-    	return null;	
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.orElse(null);
     }
 
     /**
      * Synchronized method to generate a unique session token.
+     * Uses current time in milliseconds to create a hex string.
      *
      * @return a unique token as a hexadecimal string.
      */

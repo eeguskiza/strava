@@ -2,15 +2,14 @@ package com.deusto.strava.service;
 
 import com.deusto.strava.entity.TrainingSession;
 import com.deusto.strava.entity.User;
-import com.deusto.strava.repository.TrainingSessionRepository;
-import com.deusto.strava.repository.UserRepository;
+import com.deusto.strava.repository.ITrainingSessionRepository;
+import com.deusto.strava.repository.IUserRepository;
 import com.deusto.strava.dto.TrainingSessionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,12 +17,12 @@ public class SessionService {
 
     @Autowired
     private AuthService authService;
-    private final UserRepository userRepository;
-    private final TrainingSessionRepository trainingSessionRepository;
+    private final IUserRepository IUserRepository;
+    private final ITrainingSessionRepository ITrainingSessionRepository;
 
-	public SessionService(UserRepository userRepository, TrainingSessionRepository trainingSessionRepository) {
-		this.userRepository = userRepository;
-		this.trainingSessionRepository = trainingSessionRepository;
+	public SessionService(IUserRepository IUserRepository, ITrainingSessionRepository ITrainingSessionRepository) {
+		this.IUserRepository = IUserRepository;
+		this.ITrainingSessionRepository = ITrainingSessionRepository;
 	}
 
     public String createSession(String token, TrainingSessionDTO sessionDTO) {
@@ -48,7 +47,7 @@ public class SessionService {
         user.getTrainingSessions().add(session);
 
         // Guardar los cambios y obtener la sesión persistida
-        userRepository.save(user);
+        IUserRepository.save(user);
 
         // Buscar la sesión persistida en la lista del usuario (opcional si no hay cascade)
         TrainingSession savedSession = user.getTrainingSessions()

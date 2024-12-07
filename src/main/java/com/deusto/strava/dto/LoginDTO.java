@@ -1,14 +1,14 @@
 package com.deusto.strava.dto;
 
-public class loginDTO {
+public class LoginDTO {
     private String email;
     private String password;
 
     // Constructor vacío para la deserialización
-    public loginDTO() {}
+    public LoginDTO() {}
 
     // Constructor con el campo `email`
-    public loginDTO(String email, String password) {
+    public LoginDTO(String email, String password) {
         this.email = email;
         this.password = password;
     }

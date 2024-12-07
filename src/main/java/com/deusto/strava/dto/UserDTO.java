@@ -1,9 +1,8 @@
 package com.deusto.strava.dto;
 
 import java.util.Date;
-import java.util.List;
 
-public class LoginRequestDTO {
+public class UserDTO {
     private String email;
     private String name;
     private Date birthDate;
@@ -15,11 +14,11 @@ public class LoginRequestDTO {
     private String service; // Nuevo campo para elegir el servicio de autenticación
 
     // Constructor vacío para la deserialización
-    public LoginRequestDTO() {}
+    public UserDTO() {}
 
     // Constructor con todos los campos
-    public LoginRequestDTO(String email, String name, Date birthDate, String password, double weight, double height,
-                           int maxHeartRate, int restHeartRate, String service) {
+    public UserDTO(String email, String name, Date birthDate, String password, double weight, double height,
+                   int maxHeartRate, int restHeartRate, String service) {
         this.email = email;
         this.name = name;
         this.birthDate = birthDate;

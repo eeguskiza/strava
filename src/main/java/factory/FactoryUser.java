@@ -1,20 +1,18 @@
 package factory;
 
-import serviceGateway.FacebookGateway;
-import serviceGateway.GoogleGateway;
-import serviceGateway.ServiceGateway;
+import serviceGateway.FacebookGatewayI;
+import serviceGateway.GoogleGatewayI;
+import serviceGateway.IServiceGateway;
 
 public class FactoryUser {
-    public static ServiceGateway selectService(String what) {
-        String service = what.toLowerCase();
-        //Swich case to select the service
-        switch (what) {
+    public static IServiceGateway createService(String what) throws IllegalArgumentException {
+        switch (what.toLowerCase()) {
             case "google":
-                return new GoogleGateway();
+                return new GoogleGatewayI();
             case "facebook":
-                return new FacebookGateway();
+                return new FacebookGatewayI();
             default:
-                return null;
+                throw new IllegalArgumentException("Service " + what + " is not supported");
         }
     }
 }

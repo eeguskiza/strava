@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
+public interface IChallengeRepository extends JpaRepository<Challenge, Long> {
 	Optional<Challenge>findById(Long id);
 	List<Challenge>findByEndDateGreaterThanEqual(Date endDate);
 }
