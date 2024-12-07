@@ -15,7 +15,9 @@
   "name": "John Doe",
   "birthDate": "1990-01-01",
   "weight": 75.5,
-  "height": 180.0
+  "height": 180.0,
+  "password": "password",
+  "service": "Google"
 }
 ```
 
@@ -28,7 +30,9 @@
 **Request Body:**
 ```json
 {
-  "email": "user@example.com"
+  "email": "user@example.com",
+  "password": "password",
+  "service": "Google"
 }
 ```
 
