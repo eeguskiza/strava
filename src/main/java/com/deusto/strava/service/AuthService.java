@@ -65,14 +65,8 @@ public class AuthService {
         User user = dtoToUser(userDTO);
 
         // Validar credenciales en función del servicio seleccionado
-        ServiceGateway serviceGateway = FactoryUser.selectService(userDTO.getService());
-		if (serviceGateway == null) {
-			throw new IllegalArgumentException("Invalid authentication service selected: " + userDTO.getService());
-		}
-		boolean isValid = false; 
-		if(user != null && user.getEmail() != null) {
-			isValid = serviceGateway.authenticate(userDTO.getEmail(), userDTO.getPassword());
-		}
+        boolean isValid = FactoryUser.selectService(userDTO.getService()).authenticate(userDTO.getEmail(), userDTO.getPassword());
+
         if (isValid) {
         	if (getUserByEmail(userDTO.getEmail())==null){
                 addUser(user);
@@ -104,11 +98,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email, password, or service cannot be null or empty");
         }
 
-        ServiceGateway serviceGateway = FactoryUser.selectService(credentials.getService());
-		if (serviceGateway == null) {
-			throw new IllegalArgumentException("Invalid authentication service selected: " + credentials.getService());
-		}
-		boolean isValid = serviceGateway.authenticate(credentials.getEmail(), credentials.getPassword());
+        boolean isValid = FactoryUser.selectService(credentials.getService()).authenticate(credentials.getEmail(), credentials.getPassword());
 
         if (!isValid) {
             throw new IllegalArgumentException("Invalid credentials for " + credentials.getService() + ". Login denied.");
