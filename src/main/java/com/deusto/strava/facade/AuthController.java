@@ -88,4 +88,26 @@ public class AuthController {
         }
     }
 
+    @Operation(
+            summary = "Get user info by token",
+            description = "Retrieves user information using the session token.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK: User information retrieved successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid or missing token"),
+            }
+    )
+    @GetMapping("/info")
+    public ResponseEntity<UserDTO> getUserInfo(@RequestHeader("Authorization") String token) {
+        try {
+            // Llamar al servicio para obtener el usuario
+            UserDTO userDTO = authService.getUserInfoByToken(token);
+            return ResponseEntity.ok(userDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+
 }

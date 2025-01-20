@@ -5,6 +5,7 @@ import java.sql.Date;
 
 @Entity
 public class TrainingSession {
+    public static Long count = 0L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +33,12 @@ public class TrainingSession {
 
     // Constructor
     public TrainingSession(String sport, float distance, Date startDate, float duration) {
+        this.id = count;
         this.sport = sport;
         this.distance = distance;
         this.startDate = startDate;
         this.duration = duration;
+        count++;
     }
 
     // Getters y Setters

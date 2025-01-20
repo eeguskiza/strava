@@ -50,7 +50,7 @@ public class AuthService {
         user.setWeight(userDTO.getWeight());
         user.setHeight(userDTO.getHeight());
         if (userDTO.getBirthDate() != null) {
-            user.setBirthDate(new java.sql.Date(userDTO.getBirthDate().getTime()));
+            user.setBirthDate(new java.util.Date(userDTO.getBirthDate().getTime()));
         } else {
             throw new IllegalArgumentException("Birthdate cannot be null");
         }
@@ -185,4 +185,26 @@ public class AuthService {
     private static synchronized String generateToken() {
         return Long.toHexString(System.currentTimeMillis());
     }
+
+    public UserDTO getUserInfoByToken(String token) {
+        // Verificar si el token es válido y obtener el usuario asociado
+        User user = getUserByToken(token);
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+
+        // Convertir el objeto User a UserDTO
+        return new UserDTO(
+                user.getEmail(),
+                user.getName(),
+                user.getBirthDate(),
+                null, // La contraseña no debe ser expuesta
+                user.getWeight(),
+                user.getHeight(),
+                0, // Opcional: maxHeartRate
+                0, // Opcional: restHeartRate
+                null // Opcional: service
+        );
+    }
+
 }

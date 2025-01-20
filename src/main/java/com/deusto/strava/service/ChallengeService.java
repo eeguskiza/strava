@@ -95,7 +95,7 @@ public class ChallengeService {
         // Find the challenge by ID in the global list
         Optional<Challenge> challengeOptional = IChallengeRepository.findById(challengeId);
 
-        if (!challengeOptional.isPresent()) {
+        if (challengeOptional.isEmpty()) {
             throw new IllegalArgumentException("Challenge not found: " + challengeId);
         }
 
@@ -103,7 +103,7 @@ public class ChallengeService {
 
         // Check if the user has already accepted the challenge
         if (user.getChallenges().contains(challenge)) {
-            return "You have already accepted this challenge: " + challenge.getName();
+            throw new IllegalArgumentException("You have already joined this challenge: " + challenge.getName());
         }
 
         // Add the challenge to the user's list
@@ -112,6 +112,7 @@ public class ChallengeService {
 
         return "Challenge accepted successfully: " + challenge.getName();
     }
+
 
     // Method to retrieve challenges accepted by the authenticated user
     public List<Challenge> getMyChallenges(String token) {
